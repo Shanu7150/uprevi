@@ -1,0 +1,295 @@
+// UPREVI — Prisma schema (foundation)
+// Multi-tenant: every business model carries restaurantId. One owner can own
+// multiple restaurants (multi-location) via RestaurantMembership.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN // UPREVI internal team
+  OWNER // restaurant owner
+  STAFF // restaurant staff
+  CUSTOMER // diner
+}
+
+enum Tier {
+  SPRINT
+  STARTER
+  PRO
+  ACCELERATOR
+  PARTNER
+}
+
+enum SubStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  TRIALING
+}
+
+enum Channel {
+  DIRECT
+  DOORDASH
+  UBEREATS
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELED
+}
+
+enum PromoTrigger {
+  MANUAL
+  WEATHER
+  EVENT
+  GAMEDAY
+  SLOW_DAY
+}
+
+enum TaskOwner {
+  UPREVI
+  CLIENT
+}
+
+enum TaskType {
+  TODO
+  APPROVAL
+  MILESTONE
+}
+
+enum TaskStatus {
+  OPEN
+  IN_PROGRESS
+  AWAITING_CLIENT
+  DONE
+}
+
+model User {
+  id          String               @id @default(cuid())
+  email       String               @unique
+  name        String?
+  passwordHash String?
+  role        Role                 @default(OWNER)
+  memberships RestaurantMembership[]
+  createdAt   DateTime             @default(now())
+}
+
+model Restaurant {
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  name           String
+  address        String?
+  lat            Float?
+  lng            Float?
+  platforms      Channel[]
+  tier           Tier     @default(SPRINT)
+  sprintStartDate DateTime?
+  stripeConnectId String?
+  createdAt      DateTime @default(now())
+
+  memberships    RestaurantMembership[]
+  subscription   Subscription?
+  menuCategories MenuCategory[]
+  orders         Order[]
+  customers      RestaurantCustomer[]
+  reviews        Review[]
+  promotions     Promotion[]
+  upsellRules    UpsellRule[]
+  channelRevenue ChannelRevenue[]
+  predictions    RevenuePrediction[]
+  tasks          Task[]
+  loyaltyConfig  LoyaltyConfig?
+}
+
+model RestaurantMembership {
+  id           String     @id @default(cuid())
+  userId       String
+  restaurantId String
+  role         Role       @default(OWNER)
+  user         User       @relation(fields: [userId], references: [id])
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@unique([userId, restaurantId])
+}
+
+model Subscription {
+  id                   String     @id @default(cuid())
+  restaurantId         String     @unique
+  tier                 Tier
+  status               SubStatus  @default(ACTIVE)
+  stripeSubscriptionId String?
+  currentPeriodEnd     DateTime?
+  restaurant           Restaurant @relation(fields: [restaurantId], references: [id])
+}
+
+model MenuCategory {
+  id           String     @id @default(cuid())
+  restaurantId String
+  name         String
+  sortOrder    Int        @default(0)
+  items        MenuItem[]
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+}
+
+model MenuItem {
+  id          String         @id @default(cuid())
+  categoryId  String
+  name        String
+  description String?
+  priceCents  Int
+  imageUrl    String?
+  available   Boolean        @default(true)
+  badge       String?
+  category    MenuCategory   @relation(fields: [categoryId], references: [id])
+  modifiers   ModifierGroup[]
+}
+
+model ModifierGroup {
+  id         String     @id @default(cuid())
+  menuItemId String
+  name       String
+  required   Boolean    @default(false)
+  multi      Boolean    @default(false)
+  modifiers  Modifier[]
+  menuItem   MenuItem   @relation(fields: [menuItemId], references: [id])
+}
+
+model Modifier {
+  id        String        @id @default(cuid())
+  groupId   String
+  name      String
+  priceCents Int          @default(0)
+  group     ModifierGroup @relation(fields: [groupId], references: [id])
+}
+
+model Order {
+  id           String      @id @default(cuid())
+  restaurantId String
+  customerId   String?
+  channel      Channel     @default(DIRECT)
+  status       OrderStatus @default(PENDING)
+  subtotalCents Int
+  taxCents     Int          @default(0)
+  feeCents     Int          @default(0)
+  totalCents   Int
+  createdAt    DateTime    @default(now())
+  items        OrderItem[]
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id])
+  customer     RestaurantCustomer? @relation(fields: [customerId], references: [id])
+}
+
+model OrderItem {
+  id         String @id @default(cuid())
+  orderId    String
+  menuItemId String
+  nameSnapshot String
+  priceCents Int
+  quantity   Int    @default(1)
+  order      Order  @relation(fields: [orderId], references: [id])
+}
+
+model RestaurantCustomer {
+  id            String   @id @default(cuid())
+  restaurantId  String
+  email         String?
+  phone         String?
+  name          String?
+  clvCents      Int      @default(0)
+  segment       String?  // Champions | Loyal | AtRisk | New
+  loyaltyPoints Int      @default(0)
+  loyaltyTier   String?
+  lastOrderAt   DateTime?
+  orders        Order[]
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id])
+}
+
+model Review {
+  id             String   @id @default(cuid())
+  restaurantId   String
+  platform       String   // Google | DoorDash | UberEats
+  rating         Int
+  text           String
+  sentiment      String?  // positive | mixed | negative
+  category       String?  // food | delivery | service | accuracy
+  aiDraftResponse String?
+  status         String   @default("new")
+  createdAt      DateTime @default(now())
+  restaurant     Restaurant @relation(fields: [restaurantId], references: [id])
+}
+
+model Promotion {
+  id           String       @id @default(cuid())
+  restaurantId String
+  name         String
+  triggerType  PromoTrigger @default(MANUAL)
+  status       String       @default("draft") // draft | pending_approval | active | ended
+  details      String?
+  redemptions  Int          @default(0)
+  revenueCents Int          @default(0)
+  createdAt    DateTime     @default(now())
+  restaurant   Restaurant   @relation(fields: [restaurantId], references: [id])
+}
+
+model UpsellRule {
+  id             String     @id @default(cuid())
+  restaurantId   String
+  triggerItemId  String
+  suggestedItemId String
+  conversionRate Float      @default(0)
+  restaurant     Restaurant @relation(fields: [restaurantId], references: [id])
+}
+
+model ChannelRevenue {
+  id           String     @id @default(cuid())
+  restaurantId String
+  date         DateTime
+  channel      Channel
+  revenueCents Int
+  orders       Int        @default(0)
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@unique([restaurantId, date, channel])
+}
+
+model RevenuePrediction {
+  id             String     @id @default(cuid())
+  restaurantId   String
+  date           DateTime
+  predictedCents Int
+  drivers        Json       // [{type:"weather"|"event"|"game", note, impactPct}]
+  restaurant     Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@unique([restaurantId, date])
+}
+
+model Task {
+  id           String     @id @default(cuid())
+  restaurantId String
+  title        String
+  description  String?
+  owner        TaskOwner  @default(UPREVI)
+  type         TaskType   @default(TODO)
+  status       TaskStatus @default(OPEN)
+  dueDate      DateTime?
+  createdAt    DateTime   @default(now())
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+}
+
+model LoyaltyConfig {
+  id            String     @id @default(cuid())
+  restaurantId  String     @unique
+  pointsPerDollar Int      @default(1)
+  enabled       Boolean    @default(true)
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id])
+}
