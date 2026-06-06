@@ -532,6 +532,95 @@ async function main() {
     },
   });
 
+  // ── Phase 3 demo data ────────────────────────────────────────────────────────
+  // Clear Phase 3 + Sakura content so the seed stays idempotent.
+  await db.task.deleteMany({ where: { restaurantId: { in: [bella.id, sakura.id] } } });
+  await db.channelRevenue.deleteMany({ where: { restaurantId: { in: [bella.id, sakura.id] } } });
+  await db.loyaltyReward.deleteMany({ where: { restaurantId: { in: [bella.id, sakura.id] } } });
+  await db.loyaltyConfig.deleteMany({ where: { restaurantId: { in: [bella.id, sakura.id] } } });
+  await db.order.deleteMany({ where: { restaurantId: sakura.id } });
+  await db.review.deleteMany({ where: { restaurantId: sakura.id } });
+  await db.customer.deleteMany({ where: { restaurantId: sakura.id } });
+  await db.menuCategory.deleteMany({ where: { restaurantId: sakura.id } });
+
+  // Tasks (all tiers) — the partnership made visible, for Bella Cucina.
+  await db.task.createMany({
+    data: [
+      { restaurantId: bella.id, owner: "UPREVI", type: "MILESTONE", status: "DONE", title: "Kickoff & baseline audit", description: "Documented 30-day delivery baseline.", dueDate: new Date(Date.now() - 40 * 86400000) },
+      { restaurantId: bella.id, owner: "UPREVI", type: "MILESTONE", status: "DONE", title: "Menu engineering live", description: "Repriced and restructured top categories.", dueDate: new Date(Date.now() - 20 * 86400000) },
+      { restaurantId: bella.id, owner: "UPREVI", type: "MILESTONE", status: "IN_PROGRESS", title: "Promotion campaign", description: "Weekend DoorDash boost running.", dueDate: new Date(Date.now() + 10 * 86400000) },
+      { restaurantId: bella.id, owner: "UPREVI", type: "APPROVAL", status: "AWAITING_CLIENT", title: "Approve new menu photos", description: "12 reshot hero images ready for your sign-off." },
+      { restaurantId: bella.id, owner: "UPREVI", type: "TODO", status: "IN_PROGRESS", title: "Reviewing UberEats listing copy", description: "Optimizing descriptions for search." },
+      { restaurantId: sakura.id, owner: "UPREVI", type: "APPROVAL", status: "AWAITING_CLIENT", title: "Approve spicy miso promo", description: "Game-day promo drafted for approval." },
+    ],
+  });
+
+  // Sakura Ramen (ACCELERATOR) — full data so unlocked features are demoable.
+  const sakuraMenu = await db.menuCategory.create({
+    data: {
+      restaurantId: sakura.id,
+      name: "Ramen",
+      description: "From-scratch broth, daily",
+      sortOrder: 1,
+      items: {
+        create: [
+          { restaurantId: sakura.id, name: "Tonkotsu Ramen", description: "18-hour pork bone broth, chashu, egg.", price: 16, isSignature: true, isPopular: true, popularityScore: 96, tags: ["signature"] },
+          { restaurantId: sakura.id, name: "Spicy Miso Ramen", description: "Miso-chili broth, ground pork, corn.", price: 15, isPopular: true, popularityScore: 88, tags: ["spicy"] },
+          { restaurantId: sakura.id, name: "Shoyu Ramen", description: "Soy-based clear broth, bamboo, scallion.", price: 14, popularityScore: 71, tags: [] },
+        ],
+      },
+    },
+  });
+
+  await db.customer.createMany({
+    data: [
+      { restaurantId: sakura.id, name: "Yuki Tanaka", email: "yuki@example.com", segment: "VIP", loyaltyTier: "Gold", loyaltyPoints: 980, totalOrders: 26, clv: 1240.0, avgOrderValue: 47.7, lastOrderAt: new Date() },
+      { restaurantId: sakura.id, name: "Chris Bell", email: "chris@example.com", segment: "LOYAL", loyaltyTier: "Silver", loyaltyPoints: 410, totalOrders: 9, clv: 388.0, avgOrderValue: 43.1, lastOrderAt: new Date(Date.now() - 9 * 86400000) },
+      { restaurantId: sakura.id, name: "Mei Lin", email: "mei@example.com", segment: "LAPSED", loyaltyTier: "Bronze", loyaltyPoints: 60, totalOrders: 2, clv: 78.0, avgOrderValue: 39.0, lastOrderAt: new Date(Date.now() - 75 * 86400000) },
+    ],
+  });
+
+  await db.review.createMany({
+    data: [
+      { restaurantId: sakura.id, platform: "DOORDASH", rating: 5, reviewerName: "Yuki T.", body: "The tonkotsu is unreal. Best ramen delivery in the city.", sentiment: "POSITIVE", sentimentScore: 0.97, topThemes: ["food quality", "broth"], platformCreatedAt: new Date(Date.now() - 2 * 86400000) },
+      { restaurantId: sakura.id, platform: "UBEREATS", rating: 3, reviewerName: "Chris B.", body: "Great flavor but the broth arrived lukewarm.", sentiment: "NEUTRAL", sentimentScore: 0.1, topThemes: ["temperature", "delivery"], platformCreatedAt: new Date(Date.now() - 6 * 86400000) },
+      { restaurantId: sakura.id, platform: "GOOGLE", rating: 5, reviewerName: "Mei L.", body: "Spicy miso is my weekly ritual now. So good.", sentiment: "POSITIVE", sentimentScore: 0.9, topThemes: ["spicy miso", "repeat"], platformCreatedAt: new Date(Date.now() - 11 * 86400000) },
+    ],
+  });
+
+  // Channel revenue for Sakura — last 10 days across DoorDash / UberEats / Direct.
+  const channelRows: { restaurantId: string; date: Date; channel: "DOORDASH" | "UBEREATS" | "DIRECT"; revenue: number; orders: number }[] = [];
+  for (let d = 10; d >= 1; d--) {
+    const date = new Date(Date.now() - d * 86400000);
+    date.setUTCHours(0, 0, 0, 0);
+    const wobble = (d % 3) * 40;
+    channelRows.push({ restaurantId: sakura.id, date, channel: "DOORDASH", revenue: 620 + wobble, orders: 24 + (d % 3) });
+    channelRows.push({ restaurantId: sakura.id, date, channel: "UBEREATS", revenue: 410 + wobble, orders: 16 + (d % 2) });
+    channelRows.push({ restaurantId: sakura.id, date, channel: "DIRECT", revenue: 280 + wobble, orders: 11 + (d % 2) });
+  }
+  await db.channelRevenue.createMany({ data: channelRows });
+
+  // Loyalty for Sakura.
+  await db.loyaltyConfig.create({ data: { restaurantId: sakura.id, enabled: true, pointsPerDollar: 2 } });
+  await db.loyaltyReward.createMany({
+    data: [
+      { restaurantId: sakura.id, name: "Free gyoza", pointsCost: 500 },
+      { restaurantId: sakura.id, name: "Free ramen", pointsCost: 1500 },
+    ],
+  });
+
+  // A live direct order for Sakura so its dashboard/orders aren't empty.
+  const tonkotsu = await db.menuItem.findFirstOrThrow({ where: { restaurantId: sakura.id, name: "Tonkotsu Ramen" } });
+  void sakuraMenu;
+  await db.order.create({
+    data: {
+      restaurantId: sakura.id, channel: "DIRECT", customerName: "Yuki Tanaka", orderType: "PICKUP",
+      status: "PREPARING", paymentStatus: "PAID",
+      subtotal: 32, deliveryFee: 0, tax: 2.8, tip: 5, discount: 0, total: 39.8,
+      items: { create: [{ menuItemId: tonkotsu.id, name: "Tonkotsu Ramen", price: 16, quantity: 2, subtotal: 32 }] },
+    },
+  });
+
   console.log("Seed complete:");
   console.log(`  Users: ${owner.email}, ${admin.email}, ${staff.email}, ${customer.email}`);
   console.log(`  Restaurants: ${bella.name} (SPRINT), ${sakura.name} (ACCELERATOR)`);
