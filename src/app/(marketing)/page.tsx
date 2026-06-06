@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { AuditForm } from "./AuditForm";
 import {
   ArrowRight,
   Check,
@@ -116,7 +117,7 @@ function PlanCard({
         ))}
       </ul>
       <Link
-        href="/onboarding"
+        href="#book"
         className="w-full py-3 text-sm font-bold rounded-xl text-center block transition-all"
         style={
           highlight
@@ -259,7 +260,7 @@ export default function LandingPage() {
               </a>
             ))}
           </nav>
-          <Link href="/onboarding" className="btn-accent px-5 py-2.5 text-sm">
+          <Link href="#book" className="btn-accent px-5 py-2.5 text-sm">
             Get Started
           </Link>
         </div>
@@ -332,7 +333,7 @@ export default function LandingPage() {
                 transition={{ duration: 0.55, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
                 className="flex flex-col sm:flex-row gap-3 mb-10"
               >
-                <Link href="/onboarding" className="btn-accent btn-cta-breathe px-8 py-4 text-base">
+                <Link href="#book" className="btn-accent btn-cta-breathe px-8 py-4 text-base">
                   Start your 90-day sprint
                   <ArrowRight size={17} />
                 </Link>
@@ -409,7 +410,7 @@ export default function LandingPage() {
               </div>
 
               <Link
-                href="/onboarding"
+                href="#book"
                 className="btn-accent w-full py-3.5 text-sm"
               >
                 Start for $99 today
@@ -717,7 +718,7 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/onboarding?plan=upfront" className="btn-ghost w-full py-3.5 text-sm text-center block">
+              <Link href="#book" className="btn-ghost w-full py-3.5 text-sm text-center block">
                 Get started — pay upfront
               </Link>
             </motion.div>
@@ -761,7 +762,7 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/onboarding?plan=installments" className="btn-accent w-full py-3.5 text-sm text-center block">
+              <Link href="#book" className="btn-accent w-full py-3.5 text-sm text-center block">
                 Start for $99 today
                 <ArrowRight size={15} />
               </Link>
@@ -894,7 +895,7 @@ export default function LandingPage() {
               Takes 5 minutes to start. We handle everything. Results in 90 days or your money back.
             </p>
             <Link
-              href="/onboarding"
+              href="#book"
               className="btn-cta-breathe px-10 py-4 text-base inline-flex items-center justify-center gap-2 rounded-md font-semibold transition-all"
               style={{ background: "#fff", color: "var(--navy)", boxShadow: "0 8px 28px rgba(0,0,0,0.28)" }}
             >
@@ -905,6 +906,41 @@ export default function LandingPage() {
               $99 down · Payment plan available · No contracts
             </p>
           </motion.div>
+        </div>
+      </section>
+
+      {/* ── Book a Free Audit ────────────────────────────────────────────────── */}
+      <section
+        id="book"
+        className="py-24 px-6 section-raised"
+        style={{ borderTop: "1px solid var(--border)" }}
+      >
+        <div className="max-w-5xl mx-auto grid lg:grid-cols-[1fr_1.1fr] gap-12 lg:gap-16 items-center">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] mb-3" style={{ color: "var(--accent)" }}>
+              Book a Free Audit
+            </p>
+            <h2 className="font-display font-extrabold text-4xl md:text-5xl mb-4 tracking-tight" style={{ color: "var(--navy)" }}>
+              See where your delivery revenue is leaking.
+            </h2>
+            <p className="text-lg mb-6 max-w-md" style={{ color: "var(--text-muted)" }}>
+              A free, no-commitment review of your DoorDash and UberEats presence.
+              We&apos;ll show you the gaps and exactly what the 90-day sprint would fix.
+            </p>
+            <ul className="flex flex-col gap-2.5">
+              {[
+                "Live walkthrough of your listings & menu",
+                "Revenue opportunities ranked by impact",
+                "Your 20% growth plan, mapped out",
+              ].map((t) => (
+                <li key={t} className="flex items-center gap-2.5 text-sm" style={{ color: "var(--text-muted)" }}>
+                  <Check size={15} style={{ color: "var(--accent)" }} />
+                  {t}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <AuditForm />
         </div>
       </section>
 

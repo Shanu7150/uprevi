@@ -2,11 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ArrowUpCircle, Shield } from "lucide-react";
+import {
+  LayoutDashboard,
+  ArrowUpCircle,
+  Shield,
+  ShoppingBag,
+  UtensilsCrossed,
+  Settings,
+} from "lucide-react";
 
 const ICONS = {
   dashboard: LayoutDashboard,
+  orders: ShoppingBag,
+  menu: UtensilsCrossed,
   upgrade: ArrowUpCircle,
+  settings: Settings,
   admin: Shield,
 } as const;
 
@@ -17,7 +27,10 @@ export function PortalNav({ isAdmin }: { isAdmin: boolean }) {
 
   const items: NavItem[] = [
     { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
+    { href: "/orders", label: "Orders", icon: "orders" },
+    { href: "/menu", label: "Menu", icon: "menu" },
     { href: "/upgrade", label: "Plan & upgrade", icon: "upgrade" },
+    { href: "/settings", label: "Settings", icon: "settings" },
     ...(isAdmin
       ? [{ href: "/admin", label: "Admin", icon: "admin" as const }]
       : []),
