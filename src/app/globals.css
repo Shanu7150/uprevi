@@ -1,44 +1,70 @@
 @import "tailwindcss";
 
+/*
+ * UPREVI brand tokens — mirrors src/lib/brand.ts (the TS source of truth).
+ * Master-prompt brand: navy primary, gold accent, warm cream background,
+ * Tinos (Times New Roman) display + Inter body.
+ */
+
 :root {
-  /* ── Surfaces ── */
-  --bg:           #0B0905;
-  --surface:      #131008;
-  --card:         #1B1509;
-  --card-hover:   #231C0D;
-  --card-raised:  #2A220F;
+  /* ── Surfaces (warm cream) ── */
+  --bg:           #F4F1EA;
+  --surface:      #FBFAF6;
+  --cream:        #F4F1EA;
+  --card:         #FFFFFF;
+  --card-hover:   #F7F4EC;
+  --card-raised:  #FFFFFF;
 
   /* ── Borders ── */
-  --border:       #302618;
-  --border-light: #3E3420;
+  --border:       #EAE5DC;
+  --border-light: #D6CFBC;
 
-  /* ── Text ── */
-  --text:         #F6F0E8;
-  --text-muted:   #B4A390;
-  --text-dim:     #7A6852;
+  /* ── Text (navy-tinted ink) — master §9 ── */
+  --text:         #16202E;
+  --text-muted:   #4A5568;
+  --text-dim:     #7B8494;
 
-  /* ── Brand ── */
-  --accent:        #FF6B1F;
-  --accent-dark:   #D95510;
-  --accent-hover:  #FF8035;
-  --accent-dim:    rgba(255, 107, 31, 0.14);
-  --accent-border: rgba(255, 107, 31, 0.30);
+  /* ── Navy (primary) ── */
+  --navy:         #1E3A5F;
+  --navy-soft:    #EAEFF6;
+  --navy-deep:    #13263F;
+  --navy-hover:   #24456E;
 
-  --gold:          #FFBF40;
-  --gold-dim:      rgba(255, 191, 64, 0.14);
+  /* ── Gold (accent) ── */
+  --accent:        #9A7322;
+  --accent-dark:   #7C5C18;
+  --accent-hover:  #B8923F;
+  --accent-dim:    rgba(154, 115, 34, 0.10);
+  --accent-border: rgba(154, 115, 34, 0.28);
+  --gold:          #9A7322;
+  --gold-light:    #B8923F;
+  --gold-dim:      rgba(154, 115, 34, 0.12);
 
-  /* ── Status ── */
-  --green:         #2FD49A;
-  --green-dim:     rgba(47, 212, 154, 0.14);
-  --red:           #FF6B6B;
-  --red-dim:       rgba(255, 107, 107, 0.14);
-  --blue:          #4DB8FF;
-  --blue-dim:      rgba(77, 184, 255, 0.14);
+  /* ── Status — master §9 ── */
+  --green:         #157A52;
+  --green-dim:     rgba(21, 122, 82, 0.12);
+  --red:           #C23B3B;
+  --red-dim:       rgba(194, 59, 59, 0.10);
+  --blue:          #2D6CA8;
+  --blue-dim:      rgba(45, 108, 168, 0.12);
 }
 
+/* Tailwind v4 theme bridge — exposes brand tokens to utilities + fonts. */
 @theme inline {
   --color-background: var(--bg);
   --color-foreground: var(--text);
+
+  --color-navy: var(--navy);
+  --color-navy-soft: var(--navy-soft);
+  --color-navy-deep: var(--navy-deep);
+  --color-gold: var(--gold);
+  --color-gold-light: var(--gold-light);
+  --color-cream: var(--cream);
+  --color-ink: var(--text);
+  --color-ink-muted: var(--text-muted);
+
+  --font-display: var(--font-tinos), "Times New Roman", Times, serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
 }
 
 *,
@@ -56,89 +82,96 @@ html {
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: var(--font-manrope), system-ui, sans-serif;
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
   min-height: 100vh;
   line-height: 1.6;
 }
 
-/* ── Film grain ── */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 9998;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 160px 160px;
-}
-
 /* ── Scrollbar ── */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 2px; }
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: var(--cream); }
+::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 5px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
 
 /* ── Selection ── */
-::selection { background: var(--accent-dim); color: var(--accent); }
+::selection { background: rgba(154, 115, 34, 0.18); color: var(--navy); }
 
 /* ── Focus ── */
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--navy);
   outline-offset: 3px;
   border-radius: 4px;
 }
 
 /* ── Typography ── */
 .font-display {
-  font-family: var(--font-bricolage), 'Bricolage Grotesque', system-ui, sans-serif;
+  font-family: var(--font-tinos), "Times New Roman", Times, serif;
+  letter-spacing: -0.005em;
 }
 .font-mono-price {
-  font-family: var(--font-jetbrains), 'Courier New', monospace;
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-feature-settings: "tnum" 1;
+  letter-spacing: -0.01em;
 }
 
 /* ── Buttons ── */
 .btn-accent {
-  background: linear-gradient(145deg, var(--accent) 0%, var(--accent-dark) 100%);
+  background: var(--navy);
   color: #fff;
-  border-radius: 10px;
-  font-weight: 700;
-  font-family: var(--font-manrope), system-ui, sans-serif;
-  letter-spacing: 0.01em;
+  border-radius: 7px;
+  font-weight: 600;
+  font-family: var(--font-inter), system-ui, sans-serif;
+  letter-spacing: 0.005em;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: none;
+  border: 1px solid var(--navy);
   transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
               box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1),
-              filter 0.18s ease;
-  box-shadow:
-    0 4px 20px rgba(255, 107, 31, 0.40),
-    0 1px 0 rgba(255, 255, 255, 0.12) inset;
+              background 0.18s ease;
+  box-shadow: 0 4px 16px rgba(30, 58, 95, 0.18);
 }
 .btn-accent:hover {
   transform: translateY(-2px);
-  box-shadow:
-    0 8px 32px rgba(255, 107, 31, 0.55),
-    0 1px 0 rgba(255, 255, 255, 0.12) inset;
-  filter: brightness(1.06);
+  background: var(--navy-hover);
+  box-shadow: 0 8px 26px rgba(30, 58, 95, 0.26);
 }
 .btn-accent:active {
   transform: translateY(0);
-  box-shadow:
-    0 2px 10px rgba(255, 107, 31, 0.35),
-    0 1px 0 rgba(255, 255, 255, 0.08) inset;
+  box-shadow: 0 2px 8px rgba(30, 58, 95, 0.20);
+}
+
+/* Gold accent button — secondary emphasis. */
+.btn-gold {
+  background: var(--gold);
+  color: #fff;
+  border-radius: 7px;
+  font-weight: 600;
+  font-family: var(--font-inter), system-ui, sans-serif;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--gold);
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              background 0.18s ease, box-shadow 0.18s ease;
+  box-shadow: 0 4px 16px rgba(154, 115, 34, 0.20);
+}
+.btn-gold:hover {
+  transform: translateY(-2px);
+  background: var(--gold-light);
 }
 
 .btn-ghost {
   background: transparent;
   border: 1.5px solid var(--border-light);
-  color: var(--text);
-  border-radius: 10px;
+  color: var(--navy);
+  border-radius: 7px;
   font-weight: 600;
-  font-family: var(--font-manrope), system-ui, sans-serif;
+  font-family: var(--font-inter), system-ui, sans-serif;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -147,25 +180,25 @@ body::after {
   transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
 }
 .btn-ghost:hover {
-  border-color: var(--text-muted);
-  background: var(--card);
-  color: var(--text);
+  border-color: var(--navy);
+  background: var(--cream);
+  color: var(--navy);
 }
 
 /* ── Inputs ── */
 .input-base {
-  background: var(--card);
+  background: var(--surface);
   border: 1.5px solid var(--border);
-  border-radius: 10px;
+  border-radius: 7px;
   color: var(--text);
-  font-family: var(--font-manrope), system-ui, sans-serif;
+  font-family: var(--font-inter), system-ui, sans-serif;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   width: 100%;
 }
 .input-base:focus {
   outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-dim);
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.10);
 }
 .input-base::placeholder { color: var(--text-dim); }
 
@@ -173,21 +206,20 @@ body::after {
 .card-base {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
-  transition: border-color 0.2s ease;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(30, 58, 95, 0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 .card-base:hover {
   border-color: var(--border-light);
+  box-shadow: 0 8px 28px rgba(30, 58, 95, 0.08);
 }
 
 .card-raised {
   background: var(--card-raised);
-  border: 1px solid var(--border-light);
-  border-radius: 14px;
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.4),
-    0 1px 0 rgba(255, 255, 255, 0.05) inset;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(30, 58, 95, 0.10);
 }
 
 /* ── Badges ── */
@@ -200,24 +232,25 @@ body::after {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.04em;
-  font-family: var(--font-manrope), system-ui, sans-serif;
+  font-family: var(--font-inter), system-ui, sans-serif;
 }
 
 /* ── Guarantee card ── */
 .guarantee-card {
-  background: var(--card);
-  border: 2px solid var(--accent-border);
-  border-radius: 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--accent-border);
+  border-radius: 14px;
   box-shadow:
-    0 0 0 1px rgba(255, 107, 31, 0.08),
-    0 20px 60px rgba(0, 0, 0, 0.5),
-    0 1px 0 rgba(255, 255, 255, 0.05) inset;
+    0 0 0 1px rgba(154, 115, 34, 0.05),
+    0 24px 60px rgba(30, 58, 95, 0.12);
 }
 
-/* ── Section dividers ── */
+/* ── Section backgrounds ── */
 .section-dark   { background: var(--bg); }
-.section-mid    { background: var(--surface); }
-.section-raised { background: var(--card); }
+.section-mid    { background: var(--cream); }
+.section-raised { background: var(--surface); }
+.section-cream  { background: var(--cream); }
+.section-navy   { background: var(--navy); color: var(--cream); }
 
 /* ── Animations ── */
 @keyframes fadeUp {
@@ -225,8 +258,8 @@ body::after {
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes breathePulse {
-  0%, 100% { box-shadow: 0 4px 20px rgba(255, 107, 31, 0.40), 0 1px 0 rgba(255,255,255,0.12) inset; }
-  50%       { box-shadow: 0 6px 28px rgba(255, 107, 31, 0.60), 0 1px 0 rgba(255,255,255,0.12) inset; }
+  0%, 100% { box-shadow: 0 4px 16px rgba(30, 58, 95, 0.18); }
+  50%       { box-shadow: 0 8px 28px rgba(30, 58, 95, 0.32); }
 }
 @keyframes slideUp {
   from { transform: translateY(100%); }
@@ -248,10 +281,10 @@ body::after {
 .delay-500 { animation-delay: 500ms; }
 .delay-600 { animation-delay: 600ms; }
 
-/* ── Hero bg grid ── */
+/* ── Hero bg grid (subtle navy hairlines on cream) ── */
 .hero-grid {
   background-image:
-    linear-gradient(rgba(255, 107, 31, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 107, 31, 0.04) 1px, transparent 1px);
-  background-size: 48px 48px;
+    linear-gradient(rgba(30, 58, 95, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30, 58, 95, 0.035) 1px, transparent 1px);
+  background-size: 52px 52px;
 }

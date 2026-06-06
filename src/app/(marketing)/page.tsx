@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -80,8 +81,8 @@ function PlanCard({
         background: highlight ? "var(--card-raised)" : "var(--card)",
         border: `${highlight ? "2px" : "1px"} solid ${highlight ? "var(--accent-border)" : "var(--border)"}`,
         boxShadow: highlight
-          ? "0 0 0 1px rgba(255,107,31,0.08), 0 20px 60px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.05) inset"
-          : "0 1px 0 rgba(255,255,255,0.04) inset",
+          ? "0 0 0 1px rgba(30,58,95,0.06), 0 18px 50px rgba(30,58,95,0.14)"
+          : "0 1px 2px rgba(30,58,95,0.04)",
       }}
     >
       {badge && (
@@ -120,9 +121,9 @@ function PlanCard({
         style={
           highlight
             ? {
-                background: "linear-gradient(145deg, var(--accent) 0%, var(--accent-dark) 100%)",
+                background: "var(--navy)",
                 color: "white",
-                boxShadow: "0 4px 16px rgba(255,107,31,0.4), 0 1px 0 rgba(255,255,255,0.1) inset",
+                boxShadow: "0 4px 16px rgba(30,58,95,0.22)",
               }
             : {
                 background: "transparent",
@@ -229,15 +230,21 @@ export default function LandingPage() {
       <header
         className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
         style={{
-          background: scrolled ? "rgba(11,9,5,0.94)" : "transparent",
+          background: scrolled ? "rgba(255,255,255,0.86)" : "transparent",
           backdropFilter: scrolled ? "blur(16px)" : "none",
           borderBottom: scrolled ? "1px solid var(--border)" : "1px solid transparent",
         }}
       >
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <span className="font-display text-xl font-bold tracking-wider" style={{ color: "var(--accent)" }}>
-            UPREVI
-          </span>
+          <Link href="/" aria-label="UPREVI home">
+            <Image
+              src="/logo/UPREVI-logo-horizontal.png"
+              alt="UPREVI"
+              width={132}
+              height={32}
+              priority
+            />
+          </Link>
           <nav className="hidden md:flex items-center gap-8">
             {["How It Works", "Pricing", "Results", "FAQ"].map((item) => (
               <a
@@ -264,7 +271,7 @@ export default function LandingPage() {
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse 80% 60% at 20% 50%, rgba(255,107,31,0.09) 0%, transparent 70%)",
+            background: "radial-gradient(ellipse 80% 60% at 22% 45%, rgba(30,58,95,0.07) 0%, transparent 70%)",
           }}
         />
 
@@ -541,11 +548,11 @@ export default function LandingPage() {
                     className="w-12 h-12 rounded-full flex items-center justify-center text-center text-xs font-bold shrink-0 z-10 leading-tight"
                     style={{
                       background: i === arr.length - 1
-                        ? "linear-gradient(145deg, var(--accent), var(--accent-dark))"
-                        : "var(--card-hover)",
-                      border: `1.5px solid ${i === arr.length - 1 ? "var(--accent)" : "var(--border-light)"}`,
+                        ? "var(--navy)"
+                        : "var(--cream)",
+                      border: `1.5px solid ${i === arr.length - 1 ? "var(--navy)" : "var(--border-light)"}`,
                       color: i === arr.length - 1 ? "white" : "var(--accent)",
-                      boxShadow: i === arr.length - 1 ? "0 4px 16px rgba(255,107,31,0.4)" : "none",
+                      boxShadow: i === arr.length - 1 ? "0 4px 16px rgba(30,58,95,0.22)" : "none",
                     }}
                   >
                     {day.includes("–") ? day.split("–")[0] : day.replace("Day ", "")}
@@ -724,7 +731,7 @@ export default function LandingPage() {
             >
               <div
                 className="absolute -top-3 left-6 badge px-3 py-1.5 text-xs"
-                style={{ background: "linear-gradient(145deg, var(--accent), var(--accent-dark))", color: "white", boxShadow: "0 4px 12px rgba(255,107,31,0.4)" }}
+                style={{ background: "var(--accent)", color: "white", boxShadow: "0 4px 12px rgba(154,115,34,0.32)" }}
               >
                 Most popular
               </div>
@@ -866,12 +873,12 @@ export default function LandingPage() {
 
       {/* ── Final CTA ────────────────────────────────────────────────────────── */}
       <section
-        className="py-24 px-6 section-dark relative overflow-hidden"
+        className="py-24 px-6 section-navy relative overflow-hidden"
         style={{ borderTop: "1px solid var(--border)" }}
       >
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse 70% 80% at 50% 100%, rgba(255,107,31,0.1) 0%, transparent 65%)" }}
+          style={{ background: "radial-gradient(ellipse 70% 80% at 50% 100%, rgba(184,146,63,0.20) 0%, transparent 65%)" }}
         />
         <div className="max-w-3xl mx-auto text-center relative z-10">
           <motion.div
@@ -880,17 +887,21 @@ export default function LandingPage() {
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             viewport={{ once: true }}
           >
-            <h2 className="font-display font-extrabold tracking-tight mb-6" style={{ fontSize: "clamp(44px, 6vw, 72px)" }}>
+            <h2 className="font-display font-extrabold tracking-tight mb-6" style={{ fontSize: "clamp(44px, 6vw, 72px)", color: "#fff" }}>
               Ready to grow?
             </h2>
-            <p className="text-xl mb-8 max-w-lg mx-auto" style={{ color: "var(--text-muted)" }}>
+            <p className="text-xl mb-8 max-w-lg mx-auto" style={{ color: "rgba(245,244,240,0.78)" }}>
               Takes 5 minutes to start. We handle everything. Results in 90 days or your money back.
             </p>
-            <Link href="/onboarding" className="btn-accent btn-cta-breathe px-10 py-4 text-base inline-flex">
+            <Link
+              href="/onboarding"
+              className="btn-cta-breathe px-10 py-4 text-base inline-flex items-center justify-center gap-2 rounded-md font-semibold transition-all"
+              style={{ background: "#fff", color: "var(--navy)", boxShadow: "0 8px 28px rgba(0,0,0,0.28)" }}
+            >
               Start your 90-day sprint
               <ArrowRight size={18} />
             </Link>
-            <p className="mt-5 text-sm" style={{ color: "var(--text-dim)" }}>
+            <p className="mt-5 text-sm" style={{ color: "rgba(245,244,240,0.55)" }}>
               $99 down · Payment plan available · No contracts
             </p>
           </motion.div>
@@ -905,7 +916,12 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 mb-8">
             <div>
-              <span className="font-display text-2xl font-bold" style={{ color: "var(--accent)" }}>UPREVI</span>
+              <Image
+                src="/logo/UPREVI-logo-horizontal.png"
+                alt="UPREVI"
+                width={132}
+                height={32}
+              />
               <p className="text-sm mt-1.5 max-w-xs" style={{ color: "var(--text-dim)" }}>
                 Restaurant delivery revenue growth. Guaranteed.
               </p>

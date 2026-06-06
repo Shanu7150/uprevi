@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# UPREVI
 
-## Getting Started
+Restaurant delivery revenue growth platform. One Next.js app serving four
+surfaces by hostname:
 
-First, run the development server:
+| Surface   | Host (prod)            | Local                              | Route group   |
+| --------- | ---------------------- | ---------------------------------- | ------------- |
+| Marketing | `uprevi.com`           | `http://localhost:3000`            | `(marketing)` |
+| Portal    | `app.uprevi.com`       | `http://app.localhost:3000`        | `(portal)`    |
+| Admin     | `app.uprevi.com/admin` | `http://app.localhost:3000/admin`  | `(admin)`     |
+| Order PWA | `order.uprevi.com/{slug}` | `http://order.localhost:3000/{slug}` | `(order)` |
+
+> Browsers resolve `*.localhost` to 127.0.0.1 automatically, so the subdomain
+> hosts above work in local dev with no `/etc/hosts` changes.
+
+## Stack
+
+- Next.js 16 (App Router, Turbopack) + React 19 + TypeScript (strict)
+- Tailwind v4 (CSS `@theme`; brand tokens in `src/lib/brand.ts`)
+- Prisma 7 + Postgres (driver adapter `@prisma/adapter-pg`)
+- Auth.js (NextAuth v5): credentials + optional magic-link
+- Stripe subscription webhook, GoHighLevel back-office wrapper
+
+Hostname routing lives in `src/proxy.ts` (Next 16 renamed Middleware → Proxy).
+
+## Setup
 
 ```bash
+# 1. Install
+npm install
+
+# 2. Configure env
+cp .env.local.example .env.local
+#   - set DATABASE_URL (Postgres / Neon)
+#   - set AUTH_SECRET  (openssl rand -base64 32)
+
+# 3. Database
+npm run db:migrate      # prisma migrate dev (creates tables)
+npm run db:seed         # demo data
+
+# 4. Run
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Script             | Purpose                              |
+| ------------------ | ------------------------------------ |
+| `npm run dev`      | Dev server                           |
+| `npm run build`    | Production build + type check        |
+| `npm run db:migrate` | `prisma migrate dev`               |
+| `npm run db:seed`  | Seed demo data                       |
+| `npm run db:studio`| Prisma Studio                        |
+| `npm run db:generate` | Regenerate Prisma client          |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Test credentials
 
-## Learn More
+After `npm run db:seed`, all demo accounts share the password
+**`uprevi-demo-2026`**:
 
-To learn more about Next.js, take a look at the following resources:
+| Email                | Role     | Notes                                            |
+| -------------------- | -------- | ------------------------------------------------ |
+| `owner@uprevi.com`   | OWNER    | Owns **Bella Cucina** (SPRINT) + **Sakura Ramen** (ACCELERATOR) |
+| `admin@uprevi.com`   | ADMIN    | Sees `/admin`                                    |
+| `staff@uprevi.com`   | STAFF    | Member of Bella Cucina                           |
+| `customer@uprevi.com`| CUSTOMER | Diner account                                    |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Try the tier gate
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Sign in at `http://app.localhost:3000` as `owner@uprevi.com`.
+2. On the dashboard, the **Smart promos** feature is **locked** for Bella Cucina
+   (SPRINT tier) and links to `/upgrade?feature=smart_promos`.
+3. Use the restaurant switcher to select **Sakura Ramen** (ACCELERATOR) — the
+   feature unlocks. The same gate is enforced server-side (`requireEntitlement` /
+   `assertEntitlement` in `src/lib/entitlements.ts`), not just hidden in the UI.
 
-## Deploy on Vercel
+### Order PWA
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Visit `http://order.localhost:3000/bella-cucina` to see the customer menu.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Architecture notes
+
+- **Entitlements spine:** `src/lib/tiers.ts` (pure, client-safe metadata) +
+  `src/lib/entitlements.ts` (server enforcement: `getTier`, `requireEntitlement`).
+  `<Gated>` (`src/components/Gated.tsx`) is cosmetic only.
+- **Multi-tenant:** every business query filters by `restaurantId`; users reach
+  restaurants via `RestaurantMembership`. The active restaurant is a cookie,
+  resolved + validated in `src/lib/dal.ts`.
+- **Graceful degradation:** Stripe (`/api/webhooks/stripe`) and GHL (`src/lib/ghl.ts`)
+  no-op when their keys are absent. Magic-link activates only with `RESEND_API_KEY`.
+
+> Phase 1 (foundation) is implemented. Later phases (real Stripe Checkout, AI
+> features, full ordering PWA with cart/checkout) are marked `// TODO(uprevi:)`.

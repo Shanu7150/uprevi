@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# prisma — generated client (regenerated via `prisma generate`)
+/src/generated
+
+# local brand-asset source drop (the app uses /public/logo/)
+/logo/
