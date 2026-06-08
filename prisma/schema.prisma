@@ -126,6 +126,22 @@ enum TaskStatus {
   DONE
 }
 
+enum PromotionTrigger {
+  MANUAL
+  WEATHER
+  EVENT
+  GAMEDAY
+  SLOW_DAY
+}
+
+enum PromotionStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  DISMISSED
+  ENDED
+}
+
 // ──────────────────────────────────────────────────────────────────────────────
 // Auth (Auth.js / NextAuth v5 + @auth/prisma-adapter) + app users
 // ──────────────────────────────────────────────────────────────────────────────
@@ -228,6 +244,8 @@ model Restaurant {
   channelRevenue ChannelRevenue[]
   loyaltyConfig  LoyaltyConfig?
   loyaltyRewards LoyaltyReward[]
+  predictions    RevenuePrediction[]
+  upsellRules    UpsellRule[]
 }
 
 model RestaurantMembership {
@@ -306,6 +324,8 @@ model MenuItem {
   category       MenuCategory   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   modifierGroups ModifierGroup[]
   orderItems     OrderItem[]
+  upsellTriggers   UpsellRule[] @relation("UpsellTrigger")
+  upsellSuggested  UpsellRule[] @relation("UpsellSuggested")
 
   @@index([restaurantId])
   @@index([categoryId])
@@ -483,6 +503,51 @@ model Task {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
+// Predictive revenue (§7.2) — weather + events + games → forecast
+// ──────────────────────────────────────────────────────────────────────────────
+
+model RevenuePrediction {
+  id               String   @id @default(cuid())
+  restaurantId     String
+  date             DateTime @db.Date
+  predictedRevenue Decimal  @db.Decimal(10, 2)
+  baselineRevenue  Decimal  @db.Decimal(10, 2)
+  liftPct          Float    @default(0)
+  drivers          Json     @default("[]") // [{ kind, label, impactPct }]
+  headline         String
+  createdAt        DateTime @default(now())
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@unique([restaurantId, date])
+  @@index([restaurantId])
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Smart upsell (§7.4) — frequently-bought-together, learns per restaurant
+// ──────────────────────────────────────────────────────────────────────────────
+
+model UpsellRule {
+  id              String   @id @default(cuid())
+  restaurantId    String
+  triggerItemId   String
+  suggestedItemId String
+  timesShown      Int      @default(0)
+  timesConverted  Int      @default(0)
+  conversionRate  Float    @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  triggerItem   MenuItem   @relation("UpsellTrigger", fields: [triggerItemId], references: [id], onDelete: Cascade)
+  suggestedItem MenuItem   @relation("UpsellSuggested", fields: [suggestedItemId], references: [id], onDelete: Cascade)
+
+  @@unique([restaurantId, triggerItemId, suggestedItemId])
+  @@index([restaurantId])
+  @@index([triggerItemId])
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
 // Channel intelligence (§7.1) — unified DoorDash / UberEats / direct revenue
 // ──────────────────────────────────────────────────────────────────────────────
 
@@ -556,6 +621,8 @@ model Promotion {
   name             String
   description      String?
   type             PromotionType
+  triggerType      PromotionTrigger @default(MANUAL)
+  status           PromotionStatus  @default(ACTIVE)
   value            Decimal       @default(0) @db.Decimal(10, 2)
   code             String?
   isActive         Boolean       @default(true)

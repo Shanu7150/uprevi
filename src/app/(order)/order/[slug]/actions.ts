@@ -186,3 +186,32 @@ export async function getOrderStatus(orderId: string): Promise<OrderStatusResult
     orderType: order.orderType,
   };
 }
+
+/**
+ * Smart-upsell learning (§7.4): record that a suggestion was shown or converted,
+ * scoped to the restaurant by slug. Updates the per-rule conversion rate so
+ * winners can be promoted over time.
+ */
+export async function recordUpsellEvent(
+  slug: string,
+  ruleId: string,
+  kind: "shown" | "converted",
+): Promise<{ ok: boolean }> {
+  const rule = await db.upsellRule.findFirst({
+    where: { id: ruleId, restaurant: { slug } },
+    select: { id: true, timesShown: true, timesConverted: true },
+  });
+  if (!rule) return { ok: false };
+
+  const timesShown = rule.timesShown + (kind === "shown" ? 1 : 0);
+  const timesConverted = rule.timesConverted + (kind === "converted" ? 1 : 0);
+  await db.upsellRule.update({
+    where: { id: rule.id },
+    data: {
+      timesShown,
+      timesConverted,
+      conversionRate: timesShown > 0 ? timesConverted / timesShown : 0,
+    },
+  });
+  return { ok: true };
+}

@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo, useState, useEffect, useTransition } from "react";
-import { Clock, Star, Flame, Plus, Minus, ShoppingBag, X, Check } from "lucide-react";
-import { placeOrder, getOrderStatus } from "./actions";
+import { Clock, Star, Flame, Plus, Minus, ShoppingBag, X, Check, Sparkles } from "lucide-react";
+import { placeOrder, getOrderStatus, recordUpsellEvent } from "./actions";
 
 // ── Types (serialized from the server page) ──────────────────────────────────
 export interface OModifier { id: string; name: string; price: number }
@@ -14,6 +14,7 @@ export interface OItem {
   isSignature: boolean; isPopular: boolean; modifierGroups: OGroup[];
 }
 export interface OCategory { id: string; name: string; description: string | null; items: OItem[] }
+export interface OUpsell { ruleId: string; itemId: string; name: string; price: number }
 export interface ORestaurant {
   slug: string; name: string; description: string | null; cuisineType: string | null;
   deliveryFee: number; minimumOrder: number; estimatedDeliveryMin: number; estimatedDeliveryMax: number;
@@ -30,7 +31,7 @@ interface CartLine {
 
 const TAX_RATE = 0.0875;
 
-export function OrderApp({ restaurant, categories }: { restaurant: ORestaurant; categories: OCategory[] }) {
+export function OrderApp({ restaurant, categories, upsells = {} }: { restaurant: ORestaurant; categories: OCategory[]; upsells?: Record<string, OUpsell[]> }) {
   const [cart, setCart] = useState<CartLine[]>([]);
   const [modalItem, setModalItem] = useState<OItem | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
@@ -114,8 +115,10 @@ export function OrderApp({ restaurant, categories }: { restaurant: ORestaurant; 
           cart={cart}
           restaurant={restaurant}
           subtotal={subtotal}
+          upsells={upsells}
           onClose={() => setCartOpen(false)}
           onUpdate={setCart}
+          onAddLine={(line) => setCart((c) => [...c, line])}
           onPlaced={(id) => { setPlacedOrderId(id); setCart([]); setCartOpen(false); }}
         />
       )}
@@ -202,13 +205,15 @@ function ItemModal({ item, onClose, onAdd }: { item: OItem; onClose: () => void;
 }
 
 function CartDrawer({
-  cart, restaurant, subtotal, onClose, onUpdate, onPlaced,
+  cart, restaurant, subtotal, upsells, onClose, onUpdate, onAddLine, onPlaced,
 }: {
   cart: CartLine[];
   restaurant: ORestaurant;
   subtotal: number;
+  upsells: Record<string, OUpsell[]>;
   onClose: () => void;
   onUpdate: (c: CartLine[]) => void;
+  onAddLine: (line: CartLine) => void;
   onPlaced: (orderId: string) => void;
 }) {
   const [orderType, setOrderType] = useState<"DELIVERY" | "PICKUP">("DELIVERY");
@@ -246,6 +251,37 @@ function CartDrawer({
 
   const canPlace = cart.length > 0 && name.trim() && (orderType === "PICKUP" || address.trim());
 
+  // Smart upsell — "goes well with" complements for what's in the cart.
+  const suggestions = useMemo(() => {
+    const inCart = new Set(cart.map((l) => l.itemId));
+    const seen = new Set<string>();
+    const out: OUpsell[] = [];
+    for (const line of cart) {
+      for (const s of upsells[line.itemId] ?? []) {
+        if (!inCart.has(s.itemId) && !seen.has(s.itemId)) {
+          seen.add(s.itemId);
+          out.push(s);
+        }
+      }
+    }
+    return out.slice(0, 3);
+  }, [cart, upsells]);
+
+  const [shown, setShown] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    for (const s of suggestions) {
+      if (!shown.has(s.ruleId)) {
+        setShown((prev) => new Set(prev).add(s.ruleId));
+        void recordUpsellEvent(restaurant.slug, s.ruleId, "shown");
+      }
+    }
+  }, [suggestions, shown, restaurant.slug]);
+
+  const addSuggestion = (s: OUpsell) => {
+    onAddLine({ lineId: crypto.randomUUID(), itemId: s.itemId, name: s.name, unitPrice: s.price, quantity: 1, modifiers: [] });
+    void recordUpsellEvent(restaurant.slug, s.ruleId, "converted");
+  };
+
   return (
     <div className="fixed inset-0 z-40 flex justify-end" style={{ background: "rgba(15,38,63,0.45)" }} onClick={onClose}>
       <div className="bg-white w-full max-w-md h-full overflow-y-auto" onClick={(e) => e.stopPropagation()} style={{ background: "var(--bg)" }}>
@@ -270,6 +306,26 @@ function CartDrawer({
               <span className="font-mono-price text-sm" style={{ color: "var(--navy)" }}>${(l.unitPrice * l.quantity).toFixed(2)}</span>
             </div>
           ))}
+
+          {/* Smart upsell suggestions */}
+          {suggestions.length > 0 && (
+            <div className="rounded-xl p-3" style={{ background: "var(--accent-dim)" }}>
+              <p className="text-xs font-bold flex items-center gap-1.5 mb-2" style={{ color: "var(--accent)" }}>
+                <Sparkles size={12} /> Goes well with
+              </p>
+              <div className="flex flex-col gap-1.5">
+                {suggestions.map((s) => (
+                  <div key={s.ruleId} className="flex items-center justify-between gap-2 bg-white rounded-lg px-3 py-2">
+                    <span className="text-sm" style={{ color: "var(--navy)" }}>{s.name}</span>
+                    <button type="button" onClick={() => addSuggestion(s)} className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: "var(--accent)" }}>
+                      <span className="font-mono-price">+${s.price.toFixed(2)}</span>
+                      <Plus size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Order type */}
           <div className="flex gap-2 pt-2">

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TrendingUp } from "lucide-react";
 import { requireUser, getActiveRestaurant } from "@/lib/dal";
 import { getTier } from "@/lib/entitlements";
 import { tierMeta } from "@/lib/tiers";
@@ -56,7 +57,10 @@ export default async function DashboardPage() {
   const tier = await getTier(restaurant.id);
   const meta = tierMeta(tier);
 
-  const [orderAgg, customerCount, reviewCount] = await Promise.all([
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+
+  const [orderAgg, customerCount, reviewCount, nextPrediction] = await Promise.all([
     db.order.aggregate({
       where: { restaurantId: restaurant.id },
       _sum: { total: true },
@@ -64,6 +68,10 @@ export default async function DashboardPage() {
     }),
     db.customer.count({ where: { restaurantId: restaurant.id } }),
     db.review.count({ where: { restaurantId: restaurant.id } }),
+    db.revenuePrediction.findFirst({
+      where: { restaurantId: restaurant.id, date: { gte: today } },
+      orderBy: { date: "asc" },
+    }),
   ]);
 
   const revenue = Number(orderAgg._sum.total ?? 0);
@@ -100,6 +108,33 @@ export default async function DashboardPage() {
         <StatBlock label="Customers" value={customerCount.toLocaleString()} />
         <StatBlock label="Reviews" value={reviewCount.toLocaleString()} />
       </div>
+
+      {/* Predictive forecast teaser (gated ACCELERATOR+) */}
+      <section>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-display text-xl font-bold" style={{ color: "var(--navy)" }}>
+            Forecast
+          </h2>
+          <Link href="/forecast" className="text-sm font-medium" style={{ color: "var(--accent)" }}>
+            View 7-day forecast →
+          </Link>
+        </div>
+        <Gated feature="predictive_dashboard" currentTier={tier}>
+          <Link href="/forecast" className="card-base p-5 flex items-center gap-4 block">
+            <TrendingUp size={22} style={{ color: "var(--accent)" }} className="shrink-0" />
+            <div>
+              <p className="text-sm font-medium" style={{ color: "var(--navy)" }}>
+                {nextPrediction ? nextPrediction.headline : "Generate your 7-day revenue forecast."}
+              </p>
+              {nextPrediction && (
+                <p className="text-xs mt-0.5" style={{ color: "var(--text-dim)" }}>
+                  Next: {nextPrediction.date.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" })}
+                </p>
+              )}
+            </div>
+          </Link>
+        </Gated>
+      </section>
 
       {/* Gated feature demo */}
       <section>

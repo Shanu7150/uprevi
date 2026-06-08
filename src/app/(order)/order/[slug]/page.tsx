@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
-import { OrderApp, type OCategory, type ORestaurant } from "./OrderApp";
+import { getTier } from "@/lib/entitlements";
+import { hasFeature } from "@/lib/tiers";
+import { OrderApp, type OCategory, type ORestaurant, type OUpsell } from "./OrderApp";
 
 export default async function OrderPage({
   params,
@@ -70,5 +72,26 @@ export default async function OrderPage({
     })),
   }));
 
-  return <OrderApp restaurant={r} categories={categories} />;
+  // Smart upsell (§7.4) — only when the restaurant's tier includes it (server-enforced).
+  const tier = await getTier(restaurant.id);
+  let upsells: Record<string, OUpsell[]> = {};
+  if (hasFeature(tier, "smart_upsell")) {
+    const rules = await db.upsellRule.findMany({
+      where: { restaurantId: restaurant.id },
+      orderBy: [{ conversionRate: "desc" }, { timesConverted: "desc" }],
+      include: { suggestedItem: { select: { id: true, name: true, price: true, isAvailable: true } } },
+    });
+    upsells = rules.reduce<Record<string, OUpsell[]>>((acc, rule) => {
+      if (!rule.suggestedItem.isAvailable) return acc;
+      (acc[rule.triggerItemId] ??= []).push({
+        ruleId: rule.id,
+        itemId: rule.suggestedItem.id,
+        name: rule.suggestedItem.name,
+        price: Number(rule.suggestedItem.price),
+      });
+      return acc;
+    }, {});
+  }
+
+  return <OrderApp restaurant={r} categories={categories} upsells={upsells} />;
 }

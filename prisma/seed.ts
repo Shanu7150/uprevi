@@ -621,6 +621,84 @@ async function main() {
     },
   });
 
+  // ── Phase 4 demo data (Sakura ACCELERATOR — the Owner.com-killers) ────────────
+  await db.upsellRule.deleteMany({ where: { restaurantId: { in: [bella.id, sakura.id] } } });
+  await db.revenuePrediction.deleteMany({ where: { restaurantId: { in: [bella.id, sakura.id] } } });
+  await db.promotion.deleteMany({ where: { restaurantId: sakura.id } });
+
+  // Sides for Sakura, so upsell rules have complements.
+  await db.menuCategory.create({
+    data: {
+      restaurantId: sakura.id,
+      name: "Sides",
+      sortOrder: 2,
+      items: {
+        create: [
+          { restaurantId: sakura.id, name: "Pork Gyoza", description: "Pan-fried dumplings (6).", price: 7, popularityScore: 60, tags: [] },
+          { restaurantId: sakura.id, name: "Edamame", description: "Sea salt.", price: 5, popularityScore: 40, tags: [] },
+        ],
+      },
+    },
+  });
+
+  const sakuraItems = await db.menuItem.findMany({ where: { restaurantId: sakura.id }, select: { id: true, name: true } });
+  const byName = Object.fromEntries(sakuraItems.map((i) => [i.name, i.id])) as Record<string, string>;
+
+  await db.upsellRule.createMany({
+    data: [
+      { restaurantId: sakura.id, triggerItemId: byName["Tonkotsu Ramen"], suggestedItemId: byName["Pork Gyoza"], timesShown: 120, timesConverted: 38, conversionRate: 38 / 120 },
+      { restaurantId: sakura.id, triggerItemId: byName["Spicy Miso Ramen"], suggestedItemId: byName["Edamame"], timesShown: 90, timesConverted: 21, conversionRate: 21 / 90 },
+      { restaurantId: sakura.id, triggerItemId: byName["Shoyu Ramen"], suggestedItemId: byName["Pork Gyoza"], timesShown: 60, timesConverted: 12, conversionRate: 12 / 60 },
+    ],
+  });
+
+  // 7-day forecast with showcase drivers (game day + rain) — gated predictive_dashboard.
+  const WK = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const baseByDow = [900, 760, 780, 820, 1150, 1500, 1400];
+  const OVERALL = 1070;
+  const t0 = new Date();
+  t0.setUTCHours(0, 0, 0, 0);
+  for (let n = 1; n <= 7; n++) {
+    const date = new Date(t0.getTime() + n * 86_400_000);
+    const dow = date.getUTCDay();
+    const base = baseByDow[dow];
+    let predicted = base;
+    let drivers: { kind: string; label: string; impactPct: number }[] = [];
+    let headline = "";
+
+    if (n === 2) {
+      drivers = [{ kind: "GAMEDAY", label: "Ravens vs Steelers, 8pm", impactPct: 40 }];
+      predicted = Math.round(base * 1.4);
+      headline = `${WK[dow]} looks strong: Ravens vs Steelers, 8pm. Expect ~40% above a normal ${WK[dow]}.`;
+    } else if (n === 4) {
+      drivers = [{ kind: "WEATHER", label: "Heavy rain forecast", impactPct: 25 }];
+      predicted = Math.round(base * 1.25);
+      headline = `${WK[dow]} looks strong: heavy rain forecast (delivery historically +35%). Expect ~25% above a normal day.`;
+    } else {
+      const dowLift = Math.round(((base - OVERALL) / OVERALL) * 100);
+      if (Math.abs(dowLift) >= 12) {
+        drivers = [{ kind: "DOW", label: `${WK[dow]} day-of-week pattern`, impactPct: dowLift }];
+        headline = dowLift > 0
+          ? `${WK[dow]} typically runs ~${dowLift}% above your weekly average. Staff up and stock your top sellers.`
+          : `${WK[dow]} is usually quiet (~${Math.abs(dowLift)}% below average). A slow-day promo could fill it.`;
+      } else {
+        headline = `${WK[dow]} should track close to your weekly average.`;
+      }
+    }
+    const liftPct = Math.round(((predicted - OVERALL) / OVERALL) * 100);
+    await db.revenuePrediction.create({
+      data: { restaurantId: sakura.id, date, predictedRevenue: predicted, baselineRevenue: base, liftPct, drivers, headline },
+    });
+  }
+
+  // Smart promos: one awaiting approval, one already active.
+  await db.promotion.create({
+    data: { restaurantId: sakura.id, name: "Game Day Bundle", description: "15% off orders $40+ during the game. (gameday)", type: "PERCENTAGE_DISCOUNT", triggerType: "GAMEDAY", status: "DRAFT", value: 15, code: "SAKURAGAME", isActive: false, aiGenerated: true },
+  });
+  await db.promotion.create({
+    data: { restaurantId: sakura.id, name: "Rainy Day Delivery", description: "Free delivery when the weather turns.", type: "FREE_DELIVERY", triggerType: "WEATHER", status: "ACTIVE", value: 0, code: "SAKURARAIN", isActive: true, startDate: new Date(), usageCount: 22, revenueGenerated: 540, conversionRate: 0.14, aiGenerated: true },
+  });
+
   console.log("Seed complete:");
   console.log(`  Users: ${owner.email}, ${admin.email}, ${staff.email}, ${customer.email}`);
   console.log(`  Restaurants: ${bella.name} (SPRINT), ${sakura.name} (ACCELERATOR)`);

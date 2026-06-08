@@ -14,12 +14,16 @@ import {
   Gift,
   BarChart3,
   ListChecks,
+  TrendingUp,
+  BadgePercent,
 } from "lucide-react";
 
 const ICONS = {
   dashboard: LayoutDashboard,
   orders: ShoppingBag,
   menu: UtensilsCrossed,
+  forecast: TrendingUp,
+  promotions: BadgePercent,
   reviews: Star,
   customers: Users,
   loyalty: Gift,
@@ -37,8 +41,10 @@ export function PortalNav({ isAdmin }: { isAdmin: boolean }) {
 
   const items: NavItem[] = [
     { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
+    { href: "/forecast", label: "Forecast", icon: "forecast" },
     { href: "/orders", label: "Orders", icon: "orders" },
     { href: "/menu", label: "Menu", icon: "menu" },
+    { href: "/promotions", label: "Promotions", icon: "promotions" },
     { href: "/reviews", label: "Reviews", icon: "reviews" },
     { href: "/customers", label: "Customers", icon: "customers" },
     { href: "/loyalty", label: "Loyalty", icon: "loyalty" },
