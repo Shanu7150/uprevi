@@ -16,6 +16,7 @@ import {
   ListChecks,
   TrendingUp,
   BadgePercent,
+  Briefcase,
 } from "lucide-react";
 
 const ICONS = {
@@ -29,6 +30,7 @@ const ICONS = {
   loyalty: Gift,
   channels: BarChart3,
   tasks: ListChecks,
+  services: Briefcase,
   upgrade: ArrowUpCircle,
   settings: Settings,
   admin: Shield,
@@ -50,6 +52,7 @@ export function PortalNav({ isAdmin }: { isAdmin: boolean }) {
     { href: "/loyalty", label: "Loyalty", icon: "loyalty" },
     { href: "/channels", label: "Channels", icon: "channels" },
     { href: "/tasks", label: "Tasks", icon: "tasks" },
+    { href: "/services", label: "Services", icon: "services" },
     { href: "/upgrade", label: "Plan & upgrade", icon: "upgrade" },
     { href: "/settings", label: "Settings", icon: "settings" },
     ...(isAdmin

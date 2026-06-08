@@ -22,6 +22,43 @@ export function getStripe(): Stripe | null {
   return _stripe;
 }
 
+/** Map a UPREVI tier to its configured Stripe price id (null if unset). */
+export function priceIdForTier(tier: Tier): string | null {
+  const map: Record<Tier, string | undefined> = {
+    SPRINT: undefined,
+    STARTER: process.env.STRIPE_PRICE_STARTER,
+    PRO: process.env.STRIPE_PRICE_PRO,
+    ACCELERATOR: process.env.STRIPE_PRICE_ACCELERATOR,
+    PARTNER: process.env.STRIPE_PRICE_PARTNER,
+  };
+  return map[tier] ?? null;
+}
+
+/**
+ * Create a Stripe Checkout (subscription) session for a tier upgrade.
+ * Returns the hosted checkout URL, or null when Stripe/price is not configured
+ * (callers fall back to routing an upgrade request to the UPREVI team).
+ */
+export async function createCheckoutSession(opts: {
+  priceId: string;
+  clientReferenceId: string;
+  customerEmail?: string;
+  successUrl: string;
+  cancelUrl: string;
+}): Promise<string | null> {
+  const stripe = getStripe();
+  if (!stripe) return null;
+  const session = await stripe.checkout.sessions.create({
+    mode: "subscription",
+    line_items: [{ price: opts.priceId, quantity: 1 }],
+    success_url: opts.successUrl,
+    cancel_url: opts.cancelUrl,
+    customer_email: opts.customerEmail,
+    client_reference_id: opts.clientReferenceId,
+  });
+  return session.url;
+}
+
 /** Map a Stripe price id to a UPREVI tier via env configuration. */
 export function tierForPriceId(priceId: string | null | undefined): Tier | null {
   if (!priceId) return null;

@@ -261,3 +261,19 @@ export function tierMeta(tier: Tier): TierMeta {
   if (!found) throw new Error(`Unknown tier: ${tier}`);
   return found;
 }
+
+/**
+ * Recurring monthly price in USD, for MRR math. SPRINT is the 90-day entry
+ * engagement (not recurring MRR), so it counts as 0.
+ */
+export const MONTHLY_PRICE: Record<Tier, number> = {
+  SPRINT: 0,
+  STARTER: 199,
+  PRO: 499,
+  ACCELERATOR: 999,
+  PARTNER: 2499,
+};
+
+export function monthlyPriceFor(tier: Tier): number {
+  return MONTHLY_PRICE[tier];
+}

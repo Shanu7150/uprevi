@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect, useTransition } from "react";
+import { useMemo, useState, useEffect, useRef, useTransition } from "react";
 import { Clock, Star, Flame, Plus, Minus, ShoppingBag, X, Check, Sparkles } from "lucide-react";
 import { placeOrder, getOrderStatus, recordUpsellEvent } from "./actions";
 
@@ -267,15 +267,17 @@ function CartDrawer({
     return out.slice(0, 3);
   }, [cart, upsells]);
 
-  const [shown, setShown] = useState<Set<string>>(new Set());
+  // Track which suggestions we've already counted as "shown" without triggering
+  // re-renders (a ref, not state — avoids setState-in-effect).
+  const shownRef = useRef<Set<string>>(new Set());
   useEffect(() => {
     for (const s of suggestions) {
-      if (!shown.has(s.ruleId)) {
-        setShown((prev) => new Set(prev).add(s.ruleId));
+      if (!shownRef.current.has(s.ruleId)) {
+        shownRef.current.add(s.ruleId);
         void recordUpsellEvent(restaurant.slug, s.ruleId, "shown");
       }
     }
-  }, [suggestions, shown, restaurant.slug]);
+  }, [suggestions, restaurant.slug]);
 
   const addSuggestion = (s: OUpsell) => {
     onAddLine({ lineId: crypto.randomUUID(), itemId: s.itemId, name: s.name, unitPrice: s.price, quantity: 1, modifiers: [] });

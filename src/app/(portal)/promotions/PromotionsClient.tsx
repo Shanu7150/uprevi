@@ -82,7 +82,6 @@ export function PromotionsClient({ promotions, currentTier }: { promotions: Prom
           ) : (
             <div className="flex flex-col gap-2">
               {active.map((p) => {
-                const T = TRIGGER[p.triggerType as keyof typeof TRIGGER] ?? TRIGGER.MANUAL;
                 return (
                   <div key={p.id} className="card-base p-4 flex items-center justify-between gap-3">
                     <div>

@@ -2,6 +2,7 @@ import { Check } from "lucide-react";
 import { requireUser, getActiveRestaurant } from "@/lib/dal";
 import { getTier } from "@/lib/entitlements";
 import { TIERS, FEATURES, tierRank, type FeatureKey } from "@/lib/tiers";
+import { UpgradeButton } from "./UpgradeButton";
 
 export default async function UpgradePage({
   searchParams,
@@ -100,15 +101,7 @@ export default async function UpgradePage({
                 ))}
               </ul>
 
-              {/* TODO(uprevi): wire real Stripe Checkout for upgrades (Phase 2). */}
-              <button
-                type="button"
-                disabled={isCurrent || isDowngrade}
-                className={isCurrent || isDowngrade ? "btn-ghost px-3 py-2 text-sm" : "btn-accent px-3 py-2 text-sm"}
-                style={isCurrent || isDowngrade ? { opacity: 0.6, cursor: "default" } : undefined}
-              >
-                {isCurrent ? "Current plan" : isDowngrade ? "Included" : "Upgrade"}
-              </button>
+              <UpgradeButton tier={t.tier} isCurrent={isCurrent} isDowngrade={isDowngrade} />
             </div>
           );
         })}

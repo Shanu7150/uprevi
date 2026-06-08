@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    env:
+      # Build/generate never connect to the DB (lazy Prisma adapter); these are
+      # placeholders so config loading and Auth.js don't complain in CI.
+      DATABASE_URL: postgresql://user:pass@localhost:5432/uprevi
+      AUTH_SECRET: ci-placeholder-secret-please-override-in-real-envs
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install (runs prisma generate via postinstall)
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build

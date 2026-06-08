@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { db } from "@/lib/db";
+import { audit } from "@/lib/audit";
 import {
   getStripe,
   tierForPriceId,
@@ -97,5 +98,12 @@ async function syncSubscription(sub: Stripe.Subscription, deleted: boolean) {
       currentPeriodEnd: getPeriodEnd(sub) ?? target.currentPeriodEnd,
       cancelAtPeriodEnd: sub.cancel_at_period_end ?? false,
     },
+  });
+
+  await audit({
+    action: deleted ? "subscription.canceled" : "subscription.synced",
+    restaurantId: target.restaurantId,
+    target: resolvedTier ?? undefined,
+    metadata: { status, stripeSubscriptionId: sub.id },
   });
 }

@@ -142,6 +142,19 @@ enum PromotionStatus {
   ENDED
 }
 
+enum PosProvider {
+  SQUARE
+  CLOVER
+  TOAST
+}
+
+enum PosStatus {
+  PENDING
+  CONNECTED
+  ERROR
+  DISCONNECTED
+}
+
 // ──────────────────────────────────────────────────────────────────────────────
 // Auth (Auth.js / NextAuth v5 + @auth/prisma-adapter) + app users
 // ──────────────────────────────────────────────────────────────────────────────
@@ -228,6 +241,7 @@ model Restaurant {
   estimatedDeliveryMax Int     @default(45)
   isActive             Boolean @default(true)
   stripeConnectId      String? // Stripe Connect account for diner payouts
+  sprintStartDate      DateTime? // 90-day sprint clock
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -246,6 +260,7 @@ model Restaurant {
   loyaltyRewards LoyaltyReward[]
   predictions    RevenuePrediction[]
   upsellRules    UpsellRule[]
+  posConnection  PosConnection?
 }
 
 model RestaurantMembership {
@@ -500,6 +515,41 @@ model Task {
 
   @@index([restaurantId])
   @@index([status])
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// POS integration (§10.17) — Square / Clover / Toast. Scaffold; real OAuth TODO.
+// ──────────────────────────────────────────────────────────────────────────────
+
+model PosConnection {
+  id                 String      @id @default(cuid())
+  restaurantId       String      @unique
+  provider           PosProvider
+  status             PosStatus   @default(PENDING)
+  externalMerchantId String?
+  connectedAt        DateTime?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Audit log (§5) — sensitive actions (tier changes, upgrade requests, admin)
+// ──────────────────────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  restaurantId String?
+  actorId      String?
+  actorEmail   String?
+  action       String
+  target       String?
+  metadata     Json?
+  createdAt    DateTime @default(now())
+
+  @@index([restaurantId])
+  @@index([action])
 }
 
 // ──────────────────────────────────────────────────────────────────────────────

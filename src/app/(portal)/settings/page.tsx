@@ -1,6 +1,8 @@
 import { requireUser, getActiveRestaurant } from "@/lib/dal";
+import { db } from "@/lib/db";
 import { SettingsForm } from "./SettingsForm";
 import { ConnectButton } from "./ConnectButton";
+import { PosSection } from "./PosSection";
 
 export default async function SettingsPage() {
   await requireUser();
@@ -37,6 +39,11 @@ export default async function SettingsPage() {
     onUberEats: restaurant.onUberEats,
   };
 
+  const pos = await db.posConnection.findUnique({
+    where: { restaurantId: restaurant.id },
+    select: { provider: true, status: true },
+  });
+
   return (
     <div className="flex flex-col gap-8 max-w-2xl">
       <div>
@@ -59,6 +66,17 @@ export default async function SettingsPage() {
           UPREVI transaction fees.
         </p>
         <ConnectButton connected={Boolean(restaurant.stripeConnectId)} />
+      </div>
+
+      <div className="card-base p-6">
+        <h2 className="font-display text-lg font-bold mb-1" style={{ color: "var(--navy)" }}>
+          POS integration
+        </h2>
+        <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>
+          Connect your point-of-sale so menu and orders stay in sync. Live sync
+          is rolling out provider by provider.
+        </p>
+        <PosSection connection={pos} />
       </div>
     </div>
   );

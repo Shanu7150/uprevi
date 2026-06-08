@@ -699,9 +699,48 @@ async function main() {
     data: { restaurantId: sakura.id, name: "Rainy Day Delivery", description: "Free delivery when the weather turns.", type: "FREE_DELIVERY", triggerType: "WEATHER", status: "ACTIVE", value: 0, code: "SAKURARAIN", isActive: true, startDate: new Date(), usageCount: 22, revenueGenerated: 540, conversionRate: 0.14, aiGenerated: true },
   });
 
+  // ── Phase 5 demo data (sprint clocks + a PARTNER restaurant) ──────────────────
+  const DAY = 86_400_000;
+  await db.restaurant.update({ where: { id: bella.id }, data: { sprintStartDate: new Date(Date.now() - 47 * DAY) } });
+  await db.restaurant.update({ where: { id: sakura.id }, data: { sprintStartDate: new Date(Date.now() - 20 * DAY) } });
+
+  const nonna = await db.restaurant.upsert({
+    where: { slug: "nonnas-table" },
+    update: { sprintStartDate: new Date(Date.now() - 120 * DAY) },
+    create: {
+      slug: "nonnas-table",
+      name: "Nonna's Table",
+      description: "Family-style Italian — full-service growth client.",
+      phone: "(312) 555-0200",
+      email: "ciao@nonnastable.com",
+      address: "55 W Grand Ave",
+      city: "Chicago",
+      state: "IL",
+      zip: "60654",
+      cuisineType: "Italian",
+      onDoorDash: true,
+      onUberEats: true,
+      deliveryFee: 3.99,
+      minimumOrder: 20,
+      estimatedDeliveryMin: 25,
+      estimatedDeliveryMax: 45,
+      sprintStartDate: new Date(Date.now() - 120 * DAY),
+    },
+  });
+  await db.restaurantMembership.upsert({
+    where: { userId_restaurantId: { userId: owner.id, restaurantId: nonna.id } },
+    update: { role: "OWNER" },
+    create: { userId: owner.id, restaurantId: nonna.id, role: "OWNER" },
+  });
+  await db.subscription.upsert({
+    where: { restaurantId: nonna.id },
+    update: { tier: "PARTNER", status: "ACTIVE" },
+    create: { restaurantId: nonna.id, tier: "PARTNER", status: "ACTIVE" },
+  });
+
   console.log("Seed complete:");
   console.log(`  Users: ${owner.email}, ${admin.email}, ${staff.email}, ${customer.email}`);
-  console.log(`  Restaurants: ${bella.name} (SPRINT), ${sakura.name} (ACCELERATOR)`);
+  console.log(`  Restaurants: ${bella.name} (SPRINT), ${sakura.name} (ACCELERATOR), ${nonna.name} (PARTNER)`);
   console.log(`  Dev password for all accounts: ${DEV_PASSWORD}`);
 }
 

@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { hasFeature, type FeatureKey, type Tier } from "@/lib/tiers";
@@ -23,11 +24,15 @@ export class EntitlementError extends Error {
   }
 }
 
-/** Current tier for a restaurant; defaults to SPRINT when no subscription. */
-export async function getTier(restaurantId: string): Promise<Tier> {
+/**
+ * Current tier for a restaurant; defaults to SPRINT when no subscription.
+ * Wrapped in React `cache()` so repeated reads within a single request/render
+ * (page + multiple <Gated> + actions) hit the DB once.
+ */
+export const getTier = cache(async (restaurantId: string): Promise<Tier> => {
   const sub = await db.subscription.findUnique({ where: { restaurantId } });
   return sub?.tier ?? "SPRINT";
-}
+});
 
 export async function hasEntitlement(
   restaurantId: string,
