@@ -20,50 +20,6 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-// ── Testimonial ───────────────────────────────────────────────────────────────
-function TestimonialCard({
-  name, restaurant, city, quote, growth, delay,
-}: {
-  name: string; restaurant: string; city: string;
-  quote: string; growth: string; delay: number;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] }}
-      viewport={{ once: true }}
-      className="card-base p-6 flex flex-col gap-4"
-    >
-      <div className="flex gap-0.5">
-        {[...Array(5)].map((_, i) => (
-          <Star key={i} size={13} fill="var(--gold)" stroke="none" />
-        ))}
-      </div>
-      <p className="text-sm leading-relaxed flex-1" style={{ color: "var(--text-muted)" }}>
-        &ldquo;{quote}&rdquo;
-      </p>
-      <div
-        className="flex items-center justify-between pt-4 border-t"
-        style={{ borderColor: "var(--border)" }}
-      >
-        <div>
-          <p className="font-semibold text-sm">{name}</p>
-          <p className="text-xs mt-0.5" style={{ color: "var(--text-dim)" }}>
-            {restaurant} · {city}
-          </p>
-        </div>
-        <span
-          className="badge"
-          style={{ background: "var(--green-dim)", color: "var(--green)" }}
-        >
-          +{growth}
-        </span>
-      </div>
-    </motion.div>
-  );
-}
-
 // ── Plan card ─────────────────────────────────────────────────────────────────
 function PlanCard({
   name, price, period, features, highlight, badge, delay, cta,
@@ -324,7 +280,8 @@ export default function LandingPage() {
                 className="text-base font-semibold mb-10"
                 style={{ color: "var(--gold)" }}
               >
-                Miss 20% growth in 90 days? Full refund + $100 cash. No questions.
+                Our written guarantee targets 20% growth in 90 days, measured
+                against your agreed revenue baseline.
               </motion.p>
 
               <motion.div
@@ -349,7 +306,7 @@ export default function LandingPage() {
                 className="flex flex-wrap gap-x-6 gap-y-2 text-sm"
                 style={{ color: "var(--text-dim)" }}
               >
-                {["No contracts", "90-day sprint", "Money-back guarantee", "Flat-rate pricing"].map((t) => (
+                {["Written agreement", "90-day sprint", "Performance guarantee", "Flat-rate pricing"].map((t) => (
                   <span key={t} className="flex items-center gap-1.5">
                     <Check size={11} style={{ color: "var(--green)" }} />
                     {t}
@@ -358,64 +315,34 @@ export default function LandingPage() {
               </motion.div>
             </div>
 
-            {/* Right: guarantee card */}
+            {/* Right: restaurant owner + guarantee */}
             <motion.div
               initial={{ opacity: 0, x: 32 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.7, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
-              className="guarantee-card p-8 flex flex-col gap-6 lg:sticky lg:top-24"
+              className="relative overflow-hidden rounded-3xl min-h-[540px] lg:sticky lg:top-24"
+              style={{ boxShadow: "0 24px 70px rgba(30,58,95,0.22)" }}
             >
-              <div>
-                <p
-                  className="text-xs font-bold uppercase tracking-[0.16em] mb-4"
-                  style={{ color: "var(--accent)" }}
-                >
-                  The Guarantee
+              <Image
+                src="/photos/restaurant-owner.jpg"
+                alt="Independent restaurant owner serving guests"
+                width={800}
+                height={1200}
+                priority
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(10,24,42,.92) 0%, rgba(10,24,42,.08) 65%)" }} />
+              <div className="absolute inset-x-0 bottom-0 p-7 text-white">
+                <p className="text-xs font-bold uppercase tracking-[0.16em] mb-3" style={{ color: "#e4c46f" }}>
+                  Built for independent operators
                 </p>
-                <div
-                  className="font-display font-extrabold leading-none mb-2"
-                  style={{ fontSize: "clamp(56px, 8vw, 80px)", color: "var(--accent)" }}
-                >
-                  20%
-                </div>
-                <p className="font-semibold text-lg leading-snug">
-                  delivery revenue growth<br />
-                  <span style={{ color: "var(--text-muted)" }}>in 90 days.</span>
+                <p className="font-display text-3xl font-bold leading-tight mb-3">
+                  More orders. Better margins. A team behind you.
                 </p>
-              </div>
-
-              <div
-                className="py-5 px-5 rounded-xl text-sm"
-                style={{ background: "var(--card-hover)", border: "1px solid var(--border)" }}
-              >
-                <p className="font-semibold mb-2" style={{ color: "var(--gold)" }}>
-                  Or we write you a check.
-                </p>
-                <p style={{ color: "var(--text-muted)" }}>
-                  Full refund of everything you paid, plus $100 cash. Guaranteed in writing on day one.
+                <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,.78)" }}>
+                  We handle the marketplace work while you focus on running the restaurant.
                 </p>
               </div>
-
-              <div className="space-y-3">
-                {[
-                  { icon: ShieldCheck, text: "Guarantee in writing, day one" },
-                  { icon: Clock, text: "First optimizations live within 7 days" },
-                  { icon: TrendingUp, text: "67% average growth across all clients" },
-                ].map(({ icon: Icon, text }) => (
-                  <div key={text} className="flex items-center gap-3 text-sm">
-                    <Icon size={15} style={{ color: "var(--accent)", flexShrink: 0 }} />
-                    <span style={{ color: "var(--text-muted)" }}>{text}</span>
-                  </div>
-                ))}
-              </div>
-
-              <Link
-                href="#book"
-                className="btn-accent w-full py-3.5 text-sm"
-              >
-                Start for $99 today
-                <ArrowRight size={15} />
-              </Link>
             </motion.div>
 
           </div>
@@ -436,15 +363,9 @@ export default function LandingPage() {
             className="text-xl md:text-2xl font-semibold leading-relaxed max-w-3xl"
             style={{ color: "var(--text-muted)" }}
           >
-            Our clients average{" "}
-            <span className="font-extrabold font-display" style={{ color: "var(--accent)", fontSize: "1.25em" }}>67%</span>
-            {" "}growth in 90 days. We only guarantee{" "}
-            <span className="font-semibold" style={{ color: "var(--text)" }}>20%</span>
-            {" "}because we sandbag the promise.{" "}
-            <span className="font-extrabold font-display" style={{ color: "var(--green)", fontSize: "1.1em" }}>$0</span>
-            {" "}hidden fees.{" "}
-            <span className="font-extrabold font-display" style={{ color: "var(--green)", fontSize: "1.1em" }}>$0</span>
-            {" "}transaction cuts. Just results.
+            Your restaurant already has demand on DoorDash and Uber Eats. We help
+            you convert more of that demand through stronger menus, pricing,
+            merchandising, promotions, and ongoing optimization.
           </motion.p>
         </div>
       </section>
@@ -466,7 +387,7 @@ export default function LandingPage() {
               How UPREVI works
             </h2>
             <p className="text-lg max-w-lg" style={{ color: "var(--text-muted)" }}>
-              A structured 90-day sprint, then ongoing growth if you want it.
+              Three focused phases, then ongoing growth support if you want it.
             </p>
           </motion.div>
 
@@ -475,22 +396,22 @@ export default function LandingPage() {
               {
                 step: "01",
                 icon: BarChart2,
-                title: "Deep platform audit",
-                body: "We analyze your DoorDash and UberEats presence — listings, photos, menu structure, pricing, reviews, and promotion history. We find exactly where revenue is leaking.",
+                title: "Phase 1 — Build the menu",
+                body: "We restructure categories, prices, sizing, modifiers, descriptions, and images to make the menu easier to shop and more profitable.",
                 delay: 0,
               },
               {
                 step: "02",
                 icon: Zap,
-                title: "90-day optimization sprint",
-                body: "Menu engineering, photo optimization, listing improvements, targeted promotions, review response strategy, and weekly performance monitoring. Every lever pulled.",
+                title: "Phase 2 — Make it sell",
+                body: "We build margin-aware deals, bundles, BOGOs, upsells, and promotional merchandising designed for each restaurant and market.",
                 delay: 0.1,
               },
               {
                 step: "03",
                 icon: Award,
-                title: "Results or full refund",
-                body: "At day 90 we review your numbers together. If we missed 20% growth, we issue a full refund plus $100 cash. If we won — and we almost always do — we talk about what's next.",
+                title: "Phase 3 — Optimize what works",
+                body: "We monitor performance, adjust weak offers, expand what is converting, manage reviews, and document results against the agreed baseline.",
                 delay: 0.2,
               },
             ].map(({ step, icon: Icon, title, body, delay }) => (
@@ -520,56 +441,32 @@ export default function LandingPage() {
             ))}
           </div>
 
-          {/* Timeline */}
+          {/* Operator story */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
             viewport={{ once: true }}
-            className="card-base p-8"
+            className="card-base overflow-hidden grid lg:grid-cols-[1.05fr_.95fr]"
           >
-            <h3 className="font-display font-bold text-xl mb-8">What happens after you sign up</h3>
-            <div>
-              {[
-                { day: "Day 1", title: "Onboarding call", desc: "We go deep on your menu, pricing, platforms, and revenue baseline. You meet your dedicated account lead." },
-                { day: "Days 2–7", title: "Audit + quick wins", desc: "Full platform audit delivered. First optimizations go live within the week — listing updates, photo improvements, description rewrites." },
-                { day: "Days 8–30", title: "Menu engineering", desc: "Pricing strategy, item positioning, modifier optimization, category restructuring. The biggest revenue lever." },
-                { day: "Days 31–75", title: "Promotion campaigns", desc: "Targeted DoorDash and UberEats promotions. Timed offers, reorder loops, and customer win-back sequences." },
-                { day: "Days 76–90", title: "Review optimization", desc: "AI-assisted review response strategy and reputation management to improve conversion on new visitors." },
-                { day: "Day 90", title: "Results review", desc: "We present your growth numbers side-by-side. Refund if we missed. Upgrade conversation if we won." },
-              ].map(({ day, title, desc }, i, arr) => (
-                <div key={day} className="flex gap-5 pb-7 relative">
-                  {i < arr.length - 1 && (
-                    <div
-                      className="absolute left-[23px] top-12 bottom-0 w-px"
-                      style={{ background: "var(--border)" }}
-                    />
-                  )}
-                  <div
-                    className="w-12 h-12 rounded-full flex items-center justify-center text-center text-xs font-bold shrink-0 z-10 leading-tight"
-                    style={{
-                      background: i === arr.length - 1
-                        ? "var(--navy)"
-                        : "var(--cream)",
-                      border: `1.5px solid ${i === arr.length - 1 ? "var(--navy)" : "var(--border-light)"}`,
-                      color: i === arr.length - 1 ? "white" : "var(--accent)",
-                      boxShadow: i === arr.length - 1 ? "0 4px 16px rgba(30,58,95,0.22)" : "none",
-                    }}
-                  >
-                    {day.includes("–") ? day.split("–")[0] : day.replace("Day ", "")}
-                  </div>
-                  <div className="pt-2.5">
-                    <p className="font-semibold mb-0.5">{title}</p>
-                    <p className="text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>{desc}</p>
-                  </div>
-                </div>
-              ))}
+            <div className="relative min-h-[360px]">
+              <Image src="/photos/pizzeria-team.jpg" alt="Restaurant operator working beside pizza ovens" width={1200} height={800} className="absolute inset-0 h-full w-full object-cover" />
+            </div>
+            <div className="p-8 lg:p-10 flex flex-col justify-center">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] mb-3" style={{ color: "var(--accent)" }}>Your growth team</p>
+              <h3 className="font-display font-bold text-3xl mb-4">Software shows the work. Our team moves it forward.</h3>
+              <p className="leading-relaxed mb-6" style={{ color: "var(--text-muted)" }}>
+                See changes, approvals, blockers, and performance in one place—while UpRevi handles the ongoing execution behind the scenes.
+              </p>
+              <div className="flex flex-wrap gap-2 text-xs font-semibold">
+                {["Clear ownership", "Documented changes", "Ongoing communication"].map((item) => <span key={item} className="badge">{item}</span>)}
+              </div>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* ── Testimonials ────────────────────────────────────────────────────── */}
+      {/* ── Verified result ─────────────────────────────────────────────────── */}
       <section
         id="results"
         className="py-24 px-6 section-raised"
@@ -590,34 +487,24 @@ export default function LandingPage() {
               Real restaurants. Real growth.
             </h2>
             <p className="text-lg max-w-lg" style={{ color: "var(--text-muted)" }}>
-              Our internal target is 60–70% growth. We only guarantee 20% because we sandbag the promise.
+              We protect client identity while showing the underlying before-and-after performance.
             </p>
           </motion.div>
-          <div className="grid md:grid-cols-3 gap-5">
-            <TestimonialCard
-              name="Marco Esposito"
-              restaurant="Bella Cucina"
-              city="Chicago, IL"
-              quote="UPREVI completely restructured our DoorDash menu. Within 45 days we were doing 30% more orders at a higher average ticket. The photo optimization alone was a game changer."
-              growth="34% in 58 days"
-              delay={0}
-            />
-            <TestimonialCard
-              name="Priya Sharma"
-              restaurant="Spice Route"
-              city="Austin, TX"
-              quote="I was skeptical about the guarantee but they actually mean it. We hit 28% delivery revenue growth by month 2. Their promotion strategy on UberEats alone drove $4k extra last month."
-              growth="28% in 52 days"
-              delay={0.1}
-            />
-            <TestimonialCard
-              name="James Okafor"
-              restaurant="The Jerk Spot"
-              city="Atlanta, GA"
-              quote="After owner.com pulled us off third-party platforms and we lost 40% of revenue, UPREVI rebuilt our entire delivery presence. Now we're making more on DoorDash than ever before."
-              growth="71% in 90 days"
-              delay={0.2}
-            />
+          <div className="card-base p-7 md:p-10 grid md:grid-cols-[1fr_auto_1fr] gap-7 items-center">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.14em] mb-2" style={{ color: "var(--text-dim)" }}>Before UpRevi</p>
+              <p className="font-display text-5xl md:text-6xl font-extrabold" style={{ color: "var(--navy)" }}>~$7</p>
+              <p className="text-sm mt-2" style={{ color: "var(--text-muted)" }}>monthly Uber Eats revenue</p>
+            </div>
+            <ArrowRight className="hidden md:block" size={30} style={{ color: "var(--accent)" }} />
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.14em] mb-2" style={{ color: "var(--text-dim)" }}>After optimization</p>
+              <p className="font-display text-5xl md:text-6xl font-extrabold" style={{ color: "var(--green)" }}>~$2,000</p>
+              <p className="text-sm mt-2" style={{ color: "var(--text-muted)" }}>average monthly Uber Eats revenue</p>
+            </div>
+            <p className="md:col-span-3 pt-6 border-t text-sm leading-relaxed" style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}>
+              Anonymized Washington coffee shop. Results reflect this client&apos;s reported platform revenue and are not a promise that every restaurant will achieve the same outcome.
+            </p>
           </div>
         </div>
       </section>
@@ -636,10 +523,10 @@ export default function LandingPage() {
               Head to Head
             </p>
             <h2 className="font-display font-extrabold text-4xl md:text-5xl mb-4 tracking-tight">
-              Why restaurants switch from Owner.com
+              Built for a different growth problem
             </h2>
             <p className="text-lg max-w-xl" style={{ color: "var(--text-muted)" }}>
-              Owner.com pulls you off the platforms where you already make money. We optimize them.
+              Direct-ordering platforms help restaurants build first-party channels. UpRevi begins by improving the DoorDash and Uber Eats channels customers already use.
             </p>
           </motion.div>
 
@@ -649,18 +536,15 @@ export default function LandingPage() {
               style={{ background: "var(--card-hover)", borderBottom: "1px solid var(--border)" }}
             >
               <span style={{ color: "var(--text-dim)" }}>Feature</span>
-              <span className="text-center" style={{ color: "var(--text-dim)" }}>Owner.com</span>
+              <span className="text-center" style={{ color: "var(--text-dim)" }}>Direct-ordering tools</span>
               <span className="text-center" style={{ color: "var(--accent)" }}>UPREVI</span>
             </div>
             <div className="px-6">
-              <CompRow feature="Delivery platform optimization" them="None" us="Full service" delay={0} />
-              <CompRow feature="ROI guarantee" them={false} us={true} delay={0.04} />
-              <CompRow feature="Transaction fees" them="5% per order" us="Zero" delay={0.08} />
-              <CompRow feature="Human strategy & account mgmt" them="Automated only" us="Dedicated lead" delay={0.12} />
-              <CompRow feature="Transparent flat-rate pricing" them={false} us={true} delay={0.16} />
-              <CompRow feature="Review management" them="Basic" us="AI + human" delay={0.20} />
-              <CompRow feature="DoorDash/UberEats optimization" them="Pulls you off" us="Maximizes" delay={0.24} />
-              <CompRow feature="Promotion strategy" them="Pre-made, no customization" us="Custom calendar" delay={0.28} />
+              <CompRow feature="Primary focus" them="First-party ordering" us="Marketplace growth" delay={0} />
+              <CompRow feature="DoorDash/Uber Eats optimization" them="Not the core service" us="Core service" delay={0.04} />
+              <CompRow feature="Hands-on menu restructuring" them="Varies" us="Included" delay={0.08} />
+              <CompRow feature="Human strategy & account management" them="Varies" us="Included" delay={0.12} />
+              <CompRow feature="Written performance guarantee" them="Varies" us="Included" delay={0.16} />
             </div>
           </div>
         </div>
@@ -862,12 +746,12 @@ export default function LandingPage() {
             </p>
             <h2 className="font-display font-extrabold text-4xl tracking-tight">Common questions</h2>
           </motion.div>
-          <FAQ q="What exactly does the guarantee mean?" a="If your DoorDash and UberEats combined delivery revenue doesn't grow by at least 20% from your baseline in 90 days, we issue a full refund of everything you paid, plus $100 cash. No hoops, no negotiations, no minimums. We put it in writing." delay={0} />
-          <FAQ q="How is the baseline calculated?" a="We use your actual platform revenue data from the 30 days before we start. We document it at kickoff and you sign off on the number. There's no ambiguity — we both see the same data." delay={0.05} />
+          <FAQ q="What exactly does the guarantee mean?" a="The signed agreement defines the eligible platforms, measurement period, client responsibilities, and remedy if the agreed 20% gross delivery-revenue target is not reached. We document the baseline together before work begins." delay={0} />
+          <FAQ q="How is the baseline calculated?" a="The program compares eligible gross delivery revenue against the prior 12-month monthly average, subject to the definitions and requirements in the signed agreement. We document the source data at kickoff so both sides work from the same baseline." delay={0.05} />
           <FAQ q="Do I need to be on DoorDash and UberEats already?" a="You need to be active on at least one platform. If you're only on one, we'll optimize that one and, if it makes sense, help you set up the other during the sprint." delay={0.1} />
-          <FAQ q="Why don't you just pull me off the platforms like Owner.com?" a="Because 40–70% of most restaurants' delivery revenue comes from DoorDash and UberEats. Abandoning those platforms is leaving real money on the table. Our entire thesis is to win on the channels where you already have customers." delay={0.15} />
+          <FAQ q="Why focus on DoorDash and Uber Eats?" a="They are established discovery and ordering channels for many independent restaurants. UpRevi focuses on improving how your restaurant converts and earns within those marketplaces while you evaluate broader direct-ordering opportunities separately." delay={0.15} />
           <FAQ q="Do I have to sign up for the ongoing monthly plan after the sprint?" a="No. The sprint is a standalone engagement. At day 90 we'll present your results and tell you what continued support would look like, but there's no auto-enrollment and no obligation." delay={0.2} />
-          <FAQ q="What if I'm already doing pretty well on delivery?" a="The higher your baseline, the harder the 20% guarantee is to miss. We've achieved 60–70% growth on average. Even restaurants already doing $20k/month in delivery have seen meaningful gains from menu restructuring and promotion timing." delay={0.25} />
+          <FAQ q="What if I'm already doing pretty well on delivery?" a="A stronger starting point changes the strategy. We review your current revenue, margins, menu structure, conversion opportunities, and operational capacity before confirming whether the program is a fit." delay={0.25} />
           <FAQ q="How much of my time does this require?" a="Very little. You'll need a 60-minute onboarding call, access to your platform accounts, and maybe 15 minutes per week to approve changes or answer questions. We do the work — you run the restaurant." delay={0.3} />
         </div>
       </section>
@@ -903,7 +787,7 @@ export default function LandingPage() {
               <ArrowRight size={18} />
             </Link>
             <p className="mt-5 text-sm" style={{ color: "rgba(245,244,240,0.55)" }}>
-              $99 down · Payment plan available · No contracts
+              $99 onboarding · Payment plan available · Written agreement required
             </p>
           </motion.div>
         </div>
@@ -974,8 +858,8 @@ export default function LandingPage() {
             className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 text-xs"
             style={{ borderTop: "1px solid var(--border)", color: "var(--text-dim)" }}
           >
-            <span>© 2025 UPREVI. All rights reserved.</span>
-            <span>Built by Rob &amp; Shayan Malik</span>
+            <span>© 2026 UPREVI. All rights reserved.</span>
+            <span>Built for independent restaurant operators.</span>
           </div>
         </div>
       </footer>

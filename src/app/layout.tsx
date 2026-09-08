@@ -21,12 +21,12 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "UPREVI — Restaurant Delivery Revenue Growth",
   description:
-    "We guarantee 20% delivery revenue growth in 90 days or you get a full refund + $100 cash. The only restaurant growth agency that optimizes DoorDash and UberEats.",
+    "UPREVI helps independent restaurants grow DoorDash and Uber Eats revenue through hands-on menu, pricing, promotion, and listing optimization.",
   metadataBase: new URL("https://uprevi.com"),
   openGraph: {
     title: "UPREVI — 20% Delivery Revenue Growth Guaranteed",
     description:
-      "Guarantee: 20% growth in 90 days or full refund + $100 cash. We optimize DoorDash & UberEats so you earn more from every order.",
+      "A hands-on 90-day growth program for DoorDash and Uber Eats, backed by a written performance guarantee.",
     url: "https://uprevi.com",
     siteName: "UPREVI",
     type: "website",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "UPREVI — Restaurant Delivery Growth Guaranteed",
-    description: "20% growth in 90 days. Guaranteed. Or full refund + $100.",
+    description: "Hands-on DoorDash and Uber Eats optimization for independent restaurants.",
   },
 };
 

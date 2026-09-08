@@ -23,8 +23,7 @@ export function AuditForm() {
           You&apos;re on the list
         </h3>
         <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-          We&apos;ll reach out within one business day to book your free delivery
-          revenue audit.
+          Our team will reach out to schedule your free delivery revenue audit.
         </p>
       </div>
     );
