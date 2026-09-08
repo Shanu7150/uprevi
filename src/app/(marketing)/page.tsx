@@ -18,6 +18,9 @@ import {
   Award,
   Clock,
   ShieldCheck,
+  Store,
+  ArrowUpRight,
+  Sparkles,
 } from "lucide-react";
 
 // ── Plan card ─────────────────────────────────────────────────────────────────
@@ -185,14 +188,20 @@ export default function LandingPage() {
 
       {/* ── Nav ─────────────────────────────────────────────────────────────── */}
       <header
-        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-3 md:px-6"
         style={{
-          background: scrolled ? "rgba(255,255,255,0.86)" : "transparent",
-          backdropFilter: scrolled ? "blur(16px)" : "none",
-          borderBottom: scrolled ? "1px solid var(--border)" : "1px solid transparent",
+          paddingTop: scrolled ? "10px" : "16px",
         }}
       >
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div
+          className="max-w-6xl mx-auto px-4 md:px-5 h-16 flex items-center justify-between rounded-2xl transition-all duration-300"
+          style={{
+            background: scrolled ? "rgba(255,255,255,0.90)" : "rgba(255,255,255,0.68)",
+            backdropFilter: "blur(18px)",
+            border: "1px solid rgba(255,255,255,0.78)",
+            boxShadow: scrolled ? "0 10px 40px rgba(30,58,95,.10)" : "0 6px 24px rgba(30,58,95,.05)",
+          }}
+        >
           <Link href="/" aria-label="UPREVI home">
             <Image
               src="/logo/UPREVI-logo-horizontal.png"
@@ -223,17 +232,19 @@ export default function LandingPage() {
       </header>
 
       {/* ── Hero ────────────────────────────────────────────────────────────── */}
-      <section className="relative min-h-screen flex items-center pt-20 pb-20 px-6 overflow-hidden hero-grid">
-        {/* Radial wash */}
+      <section className="relative min-h-screen flex items-center pt-32 pb-24 px-6 overflow-hidden hero-grid">
+        {/* Layered atmospheric background */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse 80% 60% at 22% 45%, rgba(30,58,95,0.07) 0%, transparent 70%)",
+            background: "radial-gradient(ellipse 70% 55% at 8% 30%, rgba(184,146,63,.12) 0%, transparent 68%), radial-gradient(ellipse 55% 65% at 92% 42%, rgba(30,58,95,.14) 0%, transparent 72%)",
           }}
         />
+        <div className="hero-orb hero-orb-one" />
+        <div className="hero-orb hero-orb-two" />
 
-        <div className="max-w-6xl mx-auto w-full relative z-10">
-          <div className="grid lg:grid-cols-[1fr_400px] gap-16 xl:gap-24 items-center">
+        <div className="max-w-7xl mx-auto w-full relative z-10">
+          <div className="grid lg:grid-cols-[1fr_490px] gap-14 xl:gap-24 items-center">
 
             {/* Left: copy */}
             <div>
@@ -241,24 +252,22 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                className="text-xs font-bold uppercase tracking-[0.18em] mb-8"
-                style={{ color: "var(--accent)" }}
+                className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] mb-7 px-3 py-2 rounded-full"
+                style={{ color: "var(--accent)", background: "rgba(255,255,255,.62)", border: "1px solid var(--accent-border)", boxShadow: "0 8px 28px rgba(30,58,95,.05)" }}
               >
-                Restaurant Delivery Growth Agency
+                <Sparkles size={13} /> Growth built for independent restaurants
               </motion.p>
 
               <motion.h1
                 initial={{ opacity: 0, y: 28 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
-                className="font-display font-extrabold leading-[1.0] tracking-tight mb-8"
-                style={{ fontSize: "clamp(52px, 7vw, 96px)" }}
+                className="font-display font-extrabold leading-[0.94] tracking-tight mb-8"
+                style={{ fontSize: "clamp(56px, 7.1vw, 100px)" }}
               >
-                We grow your
+                Turn your menu
                 <br />
-                delivery revenue.
-                <br />
-                <span style={{ color: "var(--accent)" }}>Guaranteed.</span>
+                into a <span className="hero-script">growth engine.</span>
               </motion.h1>
 
               <motion.p
@@ -268,7 +277,7 @@ export default function LandingPage() {
                 className="text-lg leading-relaxed mb-3 max-w-xl"
                 style={{ color: "var(--text-muted)" }}
               >
-                We optimize your DoorDash and UberEats presence — listings,
+                We optimize your DoorDash and Uber Eats presence—listings,
                 menus, photos, reviews, promotions — so you earn more from
                 every order.
               </motion.p>
@@ -277,11 +286,11 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.24, ease: [0.16, 1, 0.3, 1] }}
-                className="text-base font-semibold mb-10"
+                className="text-base font-semibold mb-9 flex items-start gap-2.5 max-w-xl"
                 style={{ color: "var(--gold)" }}
               >
-                Our written guarantee targets 20% growth in 90 days, measured
-                against your agreed revenue baseline.
+                <ShieldCheck size={19} className="mt-0.5 shrink-0" />
+                <span>Our written guarantee targets 20% growth in 90 days, measured against your agreed revenue baseline.</span>
               </motion.p>
 
               <motion.div
@@ -315,58 +324,85 @@ export default function LandingPage() {
               </motion.div>
             </div>
 
-            {/* Right: restaurant owner + guarantee */}
+            {/* Right: editorial restaurant image + live growth layer */}
             <motion.div
               initial={{ opacity: 0, x: 32 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.7, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
-              className="relative overflow-hidden rounded-3xl min-h-[540px] lg:sticky lg:top-24"
-              style={{ boxShadow: "0 24px 70px rgba(30,58,95,0.22)" }}
+              className="relative min-h-[610px] lg:sticky lg:top-24"
             >
-              <Image
-                src="/photos/restaurant-owner.jpg"
-                alt="Independent restaurant owner serving guests"
-                width={800}
-                height={1200}
-                priority
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(10,24,42,.92) 0%, rgba(10,24,42,.08) 65%)" }} />
-              <div className="absolute inset-x-0 bottom-0 p-7 text-white">
-                <p className="text-xs font-bold uppercase tracking-[0.16em] mb-3" style={{ color: "#e4c46f" }}>
-                  Built for independent operators
-                </p>
-                <p className="font-display text-3xl font-bold leading-tight mb-3">
-                  More orders. Better margins. A team behind you.
-                </p>
-                <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,.78)" }}>
-                  We handle the marketplace work while you focus on running the restaurant.
-                </p>
+              <div className="absolute inset-y-0 right-0 left-8 overflow-hidden rounded-[2rem] hero-photo-shell">
+                <Image
+                  src="/photos/restaurant-owner.jpg"
+                  alt="Independent restaurant owner serving guests"
+                  width={800}
+                  height={1200}
+                  priority
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+                <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(10,24,42,.88) 0%, rgba(10,24,42,.04) 58%)" }} />
+                <div className="absolute inset-x-0 bottom-0 p-8 pb-10 text-white">
+                  <p className="text-xs font-bold uppercase tracking-[0.16em] mb-3" style={{ color: "#ead28e" }}>Built for independent operators</p>
+                  <p className="font-display text-3xl font-bold leading-tight">More orders. Better margins.<br />A team behind you.</p>
+                </div>
               </div>
+
+              <motion.div
+                initial={{ opacity: 0, x: -24, y: 14 }}
+                animate={{ opacity: 1, x: 0, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.65, ease: [0.16, 1, 0.3, 1] }}
+                className="absolute top-10 left-0 w-[245px] rounded-2xl p-4 growth-glass"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="w-8 h-8 grid place-items-center rounded-lg" style={{ background: "var(--navy)", color: "white" }}><TrendingUp size={15} /></span>
+                    <div><p className="text-[10px] uppercase tracking-wider font-bold" style={{ color: "var(--text-dim)" }}>Growth plan</p><p className="text-xs font-semibold">90-day sprint</p></div>
+                  </div>
+                  <span className="flex h-2 w-2 rounded-full" style={{ background: "var(--green)", boxShadow: "0 0 0 5px var(--green-dim)" }} />
+                </div>
+                <div className="flex items-end gap-1.5 h-20 mb-3">
+                  {[32, 42, 38, 55, 66, 72, 91].map((height, index) => (
+                    <motion.span key={height + index} initial={{ height: 0 }} animate={{ height: `${height}%` }} transition={{ duration: .65, delay: .82 + index * .06 }} className="flex-1 rounded-t-sm" style={{ background: index === 6 ? "var(--gold)" : "rgba(30,58,95,.18)" }} />
+                  ))}
+                </div>
+                <div className="flex items-center justify-between text-[11px]"><span style={{ color: "var(--text-dim)" }}>Momentum</span><span className="font-bold" style={{ color: "var(--green)" }}>Building weekly <ArrowUpRight size={11} className="inline" /></span></div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.9 }}
+                className="absolute right-0 bottom-24 rounded-2xl p-3.5 growth-glass flex items-center gap-3"
+              >
+                <span className="w-10 h-10 rounded-xl grid place-items-center" style={{ background: "var(--accent-dim)", color: "var(--accent)" }}><Store size={18} /></span>
+                <div><p className="text-xs font-bold">Human-led execution</p><p className="text-[11px]" style={{ color: "var(--text-dim)" }}>Not another dashboard to manage</p></div>
+              </motion.div>
             </motion.div>
 
           </div>
         </div>
       </section>
 
-      {/* ── Proof strip ─────────────────────────────────────────────────────── */}
+      {/* ── Expertise rail ───────────────────────────────────────────────────── */}
       <section
-        className="py-14 px-6"
-        style={{ background: "var(--surface)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}
+        className="py-6 px-6 relative overflow-hidden"
+        style={{ background: "var(--navy)", color: "white" }}
       >
-        <div className="max-w-6xl mx-auto">
-          <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            viewport={{ once: true }}
-            className="text-xl md:text-2xl font-semibold leading-relaxed max-w-3xl"
-            style={{ color: "var(--text-muted)" }}
-          >
-            Your restaurant already has demand on DoorDash and Uber Eats. We help
-            you convert more of that demand through stronger menus, pricing,
-            merchandising, promotions, and ongoing optimization.
+        <div className="max-w-7xl mx-auto flex flex-wrap justify-center gap-x-8 gap-y-3 text-[11px] md:text-xs font-bold uppercase tracking-[0.16em]">
+          {["Menu engineering", "Pricing strategy", "Promotion design", "Marketplace growth", "Review management"].map((item, index) => (
+            <span key={item} className="flex items-center gap-8" style={{ color: "rgba(255,255,255,.82)" }}>
+              {item}{index < 4 && <span style={{ color: "var(--gold-light)" }}>✦</span>}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      <section className="py-16 px-6 section-raised">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-[1fr_auto] items-end gap-8">
+          <motion.p initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: .5 }} viewport={{ once: true }} className="font-display text-3xl md:text-4xl font-bold leading-tight max-w-3xl" style={{ color: "var(--navy)" }}>
+            Your restaurant already has demand. We turn more of that attention into orders—and more of those orders into healthy revenue.
           </motion.p>
+          <a href="#how-it-works" className="inline-flex items-center gap-2 text-sm font-bold whitespace-nowrap" style={{ color: "var(--accent)" }}>See our process <ArrowRight size={15} /></a>
         </div>
       </section>
 
