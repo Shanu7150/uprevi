@@ -78,7 +78,7 @@ export async function signUpAction(
   });
 
   try {
-    await signIn("credentials", { email, password, redirectTo: "/dashboard" });
+    await signIn("credentials", { email, password, redirectTo: "/onboarding" });
   } catch (error) {
     if (error instanceof AuthError) {
       return { error: "Account created, but sign-in failed. Try signing in." };
