@@ -46,6 +46,8 @@ export async function POST(req: Request) {
     switch (event.type) {
       case "customer.subscription.created":
       case "customer.subscription.updated":
+      case "customer.subscription.paused":
+      case "customer.subscription.resumed":
       case "customer.subscription.deleted":
         await syncSubscription(
           event.data.object as Stripe.Subscription,
@@ -68,20 +70,45 @@ async function syncSubscription(sub: Stripe.Subscription, deleted: boolean) {
   const customerId =
     typeof sub.customer === "string" ? sub.customer : sub.customer.id;
   const priceId = sub.items.data[0]?.price.id;
+  const restaurantId = sub.metadata.restaurantId;
 
   // On delete, downgrade to the base tier; otherwise resolve from the price.
   const resolvedTier = deleted ? "SPRINT" : tierForPriceId(priceId);
   const status = deleted ? "CANCELED" : mapStripeStatus(sub.status);
 
-  const target = await db.subscription.findFirst({
+  let target = await db.subscription.findFirst({
     where: {
-      OR: [{ stripeSubscriptionId: sub.id }, { stripeCustomerId: customerId }],
+      OR: [
+        { stripeSubscriptionId: sub.id },
+        { stripeCustomerId: customerId },
+        ...(restaurantId ? [{ restaurantId }] : []),
+      ],
     },
   });
 
+  // New Checkout customers do not have a Stripe customer/subscription ID in
+  // our database yet. The signed subscription metadata provides the stable
+  // restaurant link needed to create that initial record.
+  if (!target && restaurantId) {
+    target = await db.subscription.upsert({
+      where: { restaurantId },
+      create: {
+        restaurantId,
+        tier: resolvedTier ?? "SPRINT",
+        status,
+        stripeCustomerId: customerId,
+        stripeSubscriptionId: sub.id,
+        stripePriceId: priceId,
+        currentPeriodEnd: getPeriodEnd(sub),
+        cancelAtPeriodEnd: sub.cancel_at_period_end ?? false,
+      },
+      update: {},
+    });
+  }
+
   if (!target) {
     console.warn(
-      `[stripe] no local subscription matched customer ${customerId} / sub ${sub.id}`,
+      `[stripe] no local subscription matched restaurant ${restaurantId || "unknown"} / customer ${customerId} / sub ${sub.id}`,
     );
     return;
   }
