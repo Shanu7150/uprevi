@@ -1,5 +1,5 @@
 import { Check } from "lucide-react";
-import { requireUser, getActiveRestaurant } from "@/lib/dal";
+import { getActiveRestaurant } from "@/lib/dal";
 import { getTier } from "@/lib/entitlements";
 import { TIERS, FEATURES, tierRank, type FeatureKey } from "@/lib/tiers";
 import { UpgradeButton } from "./UpgradeButton";
@@ -9,7 +9,6 @@ export default async function UpgradePage({
 }: {
   searchParams: Promise<{ feature?: string }>;
 }) {
-  await requireUser();
   const restaurant = await getActiveRestaurant();
   const currentTier = restaurant ? await getTier(restaurant.id) : "SPRINT";
   const currentRank = tierRank(currentTier);
