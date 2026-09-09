@@ -47,8 +47,8 @@ export default async function DashboardPage() {
           Your account isn&apos;t linked to a restaurant yet. Once onboarding is
           complete it will appear here.
         </p>
-        <Link href="/" className="btn-ghost px-4 py-2 text-sm">
-          Back to site
+        <Link href="/onboarding" className="btn-accent px-4 py-2 text-sm">
+          Connect your restaurant
         </Link>
       </div>
     );
