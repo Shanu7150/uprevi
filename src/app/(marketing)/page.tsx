@@ -225,9 +225,18 @@ export default function LandingPage() {
               </a>
             ))}
           </nav>
-          <Link href="#book" className="btn-accent px-5 py-2.5 text-sm">
-            Get Started
-          </Link>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link
+              href="/sign-in"
+              className="text-xs sm:text-sm font-semibold px-2 sm:px-3 py-2 transition-colors"
+              style={{ color: "var(--navy)" }}
+            >
+              Client Login
+            </Link>
+            <Link href="#book" className="btn-accent hidden sm:inline-flex px-5 py-2.5 text-sm">
+              Book a Free Audit
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -887,7 +896,7 @@ export default function LandingPage() {
               <a href="#pricing" className="transition-colors hover:text-white">Pricing</a>
               <a href="#results" className="transition-colors hover:text-white">Results</a>
               <a href="#faq" className="transition-colors hover:text-white">FAQ</a>
-              <Link href="/login" className="transition-colors hover:text-white">Restaurant Login</Link>
+              <Link href="/sign-in" className="transition-colors hover:text-white">Client Login</Link>
             </div>
           </div>
           <div
