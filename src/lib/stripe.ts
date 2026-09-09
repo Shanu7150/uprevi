@@ -55,6 +55,10 @@ export async function createCheckoutSession(opts: {
     cancel_url: opts.cancelUrl,
     customer_email: opts.customerEmail,
     client_reference_id: opts.clientReferenceId,
+    metadata: { restaurantId: opts.clientReferenceId },
+    subscription_data: {
+      metadata: { restaurantId: opts.clientReferenceId },
+    },
   });
   return session.url;
 }
