@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 import { Check, ArrowRight } from "lucide-react";
 import { submitLead, type LeadFormState } from "./actions";
 
@@ -20,11 +21,14 @@ export function AuditForm() {
           <Check size={22} />
         </span>
         <h3 className="font-display text-2xl font-bold mb-2" style={{ color: "var(--navy)" }}>
-          You&apos;re on the list
+          Your audit request is in
         </h3>
-        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-          Our team will reach out to schedule your free delivery revenue audit.
+        <p className="text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
+          Your inquiry has been saved securely. An UpRevi team member will contact you by phone or email within one business day to schedule your free delivery revenue audit.
         </p>
+        <Link href="/sign-in" className="inline-flex mt-5 text-sm font-semibold" style={{ color: "var(--accent)" }}>
+          Already a client? Sign in
+        </Link>
       </div>
     );
   }
